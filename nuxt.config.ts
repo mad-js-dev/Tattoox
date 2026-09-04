@@ -1,12 +1,20 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2026-09-04',
   devtools: { enabled: true },
+  srcDir: 'app/', 
+  css: ['~/assets/css/tailwind.css'],
   modules: [
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
     '@vueuse/nuxt',
     '@nuxtjs/i18n'
+  ],
+  components: [
+    {
+      path: '~/components/ui',
+      prefix: 'Ui',
+      pathPrefix: false,
+    },
   ],
   i18n: {
     strategy: 'no_prefix',
@@ -19,5 +27,13 @@ export default defineNuxtConfig({
   typescript: {
     strict: true,
     typeCheck: true
-  }
+  },
+  vite: {
+    resolve: {
+      alias: {
+        '@': '/home/maribel/Documentos/Tattoox/app',
+        '~': '/home/maribel/Documentos/Tattoox/app',
+      },
+    },
+  },
 })
