@@ -36,7 +36,7 @@
   },
   "statuses": {
     "TODO": "To Do",
-    "IN_PROGRESS": "In Progress",
+    "IN_PROGRESS": "Progress",
     "DONE": "Completed"
   },
   "errors": {

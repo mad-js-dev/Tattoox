@@ -130,6 +130,27 @@ export const useKanbanStore = defineStore('kanban', () => {
     return updatedTask;
   }
 
+  async function moveTask(taskId: string, newStatus: string) {
+    const task = tasks.value.find(t => t.id === taskId);
+    if (!task) return;
+
+    const isMovingToArchive = newStatus === 'ARCHIVE';
+    const isMovingFromArchive = task.isArchived;
+
+    if (isMovingToArchive) {
+      return await archiveTask(taskId);
+    }
+
+    if (isMovingFromArchive) {
+      await unarchiveTask(taskId);
+    }
+
+    return await updateTask({ 
+      id: taskId, 
+      status: newStatus as TaskStatus 
+    });
+  }
+
   return {
     tasks,
     tasksByStatus,
@@ -138,6 +159,7 @@ export const useKanbanStore = defineStore('kanban', () => {
     deleteTask,
     archiveTask,
     unarchiveTask,
+    moveTask,
     archivedTasks: computed(() => tasks.value.filter(t => t.isArchived)),
   };
 });
