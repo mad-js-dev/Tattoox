@@ -1,0 +1,21 @@
+{
+  "welcome": "Welcome to Tattoox Kanban",
+  "addTask": "Add Task",
+  "board": {
+    "title": "Kanban Board",
+    "subtitle": "Manage your tasks efficiently",
+    "show_archive": "Show Archive",
+    "new_task": "New Task",
+    "archive": "Archive",
+    "no_tasks": "No tasks in this column"
+  },
+  "statuses": {
+    "TODO": "To Do",
+    "IN_PROGRESS": "In Progress",
+    "DONE": "Done"
+  },
+  "priorities": {
+    "MEDIUM": "Medium",
+    "HIGH": "High"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "welcome": "Bienvenido a Tattoox Kanban",
+  "addTask": "Agregar Tarea",
+  "board": {
+    "title": "Tablero Kanban",
+    "subtitle": "Gestiona tus tareas de forma eficiente",
+    "show_archive": "Mostrar archivo",
+    "new_task": "Nueva tarea",
+    "archive": "Archivo",
+    "no_tasks": "No hay tareas en esta columna"
+  },
+  "statuses": {
+    "TODO": "Pendiente",
+    "IN_PROGRESS": "En progreso",
+    "DONE": "Completado"
+  },
+  "priorities": {
+    "MEDIUM": "Media",
+    "HIGH": "Alta"
+  }
+}
