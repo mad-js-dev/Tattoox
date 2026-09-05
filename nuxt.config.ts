@@ -7,7 +7,7 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
     '@vueuse/nuxt',
-    '@nuxtjs/i18n'
+    '@nuxtjs/i18n',
   ],
   components: [
     {
@@ -20,9 +20,10 @@ export default defineNuxtConfig({
     strategy: 'no_prefix',
     defaultLocale: 'es',
     locales: [
-      { code: 'en', iso: 'en-US', name: 'English' },
-      { code: 'es', iso: 'es-ES', name: 'Español' }
+      { code: 'en', iso: 'en-US', name: 'English', file: 'en.json' },
+      { code: 'es', iso: 'es-ES', name: 'Español', file: 'es.json' }
     ],
+    langDir: 'locales/',
   },
   typescript: {
     strict: true,

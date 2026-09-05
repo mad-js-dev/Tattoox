@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { useLocalStorage } from '@vueuse/core';
+import { computed } from 'vue';
 import type { Task, TaskPriority, TaskStatus } from '../types/kanban';
 
 export const useKanbanStore = defineStore('kanban', () => {
@@ -23,7 +24,7 @@ export const useKanbanStore = defineStore('kanban', () => {
   ]);
 
   function tasksByStatus(status: string) {
-    return tasks.value.filter(t => t.status === status);
+    return tasks.value.filter(t => t.status === status && !t.isArchived);
   }
 
   async function addTask(taskInput: { title: string; description: string; status: TaskStatus; priority: TaskPriority }) {
@@ -91,11 +92,52 @@ export const useKanbanStore = defineStore('kanban', () => {
     }
   }
 
+  async function archiveTask(id: string) {
+    const task = tasks.value.find(t => t.id === id);
+    if (!task) return;
+
+    const updatedTask = { ...task, isArchived: true };
+    const index = tasks.value.indexOf(task);
+    tasks.value[index] = updatedTask;
+
+    try {
+      await $fetch('/api/graphql', {
+        method: 'PUT',
+        body: updatedTask,
+      });
+    } catch (e) {
+      console.warn('Server sync failed, using local storage fallback');
+    }
+    return updatedTask;
+  }
+
+  async function unarchiveTask(id: string) {
+    const task = tasks.value.find(t => t.id === id);
+    if (!task) return;
+
+    const updatedTask = { ...task, isArchived: false };
+    const index = tasks.value.indexOf(task);
+    tasks.value[index] = updatedTask;
+
+    try {
+      await $fetch('/api/graphql', {
+        method: 'PUT',
+        body: updatedTask,
+      });
+    } catch (e) {
+      console.warn('Server sync failed, using local storage fallback');
+    }
+    return updatedTask;
+  }
+
   return {
     tasks,
     tasksByStatus,
     addTask,
     updateTask,
     deleteTask,
+    archiveTask,
+    unarchiveTask,
+    archivedTasks: computed(() => tasks.value.filter(t => t.isArchived)),
   };
 });

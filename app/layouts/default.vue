@@ -2,11 +2,14 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useI18n } from 'vue-i18n';
+import { useDark, useToggle } from '@vueuse/core';
 
-const { locale } = useI18n();
+const { locale, setLocale } = useI18n();
 const isDark = useDark();
-const toggleDark = () => {
-  return useToggle(isDark)();
+const toggleDark = useToggle(isDark);
+
+const switchLanguage = () => {
+  setLocale(locale.value === 'es' ? 'en' : 'es');
 };
 </script>
 
@@ -21,7 +24,7 @@ const toggleDark = () => {
 
         <div class="flex items-center gap-3">
           <!-- Language Switcher -->
-          <Button variant="ghost" size="sm" @click="locale = locale === 'es' ? 'en' : 'es'" class="gap-2">
+          <Button variant="ghost" size="sm" @click="switchLanguage" class="gap-2">
             {{ locale === 'es' ? '🇺🇸 EN' : '🇪🇸 ES' }}
           </Button>
 

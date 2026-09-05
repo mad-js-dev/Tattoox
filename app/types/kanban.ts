@@ -8,6 +8,7 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   createdAt: string;
+  isArchived?: boolean;
 }
 
 export interface TaskInput {

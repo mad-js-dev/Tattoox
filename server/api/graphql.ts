@@ -37,6 +37,7 @@ export default defineEventHandler(async (event) => {
       status: (body.status as any) || 'TODO',
       priority: (body.priority as any) || 'MEDIUM',
       createdAt: new Date().toISOString(),
+      isArchived: body.isArchived || false,
     };
     tasks.push(newTask);
     return newTask;
@@ -57,6 +58,7 @@ export default defineEventHandler(async (event) => {
       status: (body.status as any) ?? task.status,
       priority: (body.priority as any) ?? task.priority,
       createdAt: task.createdAt,
+      isArchived: body.isArchived ?? task.isArchived,
     };
     tasks[index] = updatedTask;
     return updatedTask;
