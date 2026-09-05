@@ -4,7 +4,11 @@
 *(All current features moved to Ready)*
 
 ## 📋 Ready
-- [ ] **Bug: Board Navigation \\u0026 Layout Overhaul** (Planned $\\rightarrow$ `.hermes/plans/bugfixes/board-navigation-overhaul.md`)
+- [ ] **Feature: Column-based Scrolling** (Planned $\\rightarrow$ `.hermes/plans/features/column-scrolling.md`)
+- [ ] **Feature: Desktop Layout Densification** (Planned $\\rightarrow$ `.hermes/plans/features/desktop-densification.md`)
+- [ ] **Feature: Hover-to-Reveal Descriptions** (Planned $\\rightarrow$ `.hermes/plans/features/hover-descriptions.md`)
+- [ ] **Feature: GSAP-powered Drag & Drop** (Planned $\\rightarrow$ `.hermes/plans/features/gsap-drag-drop.md`)
+- [ ] **Bug: Board Navigation \\\\u0026 Layout Overhaul** (Planned $\\rightarrow$ `.hermes/plans/bugfixes/board-navigation-overhaul.md`)
 - [ ] **Bug: Mobile Header Alignment** (Planned $\\rightarrow$ `.hermes/plans/bugfixes/mobile-header-alignment.md`)
 
 ## 🏃 In Progress

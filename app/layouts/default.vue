@@ -14,8 +14,8 @@ const switchLanguage = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
-    <header class="border-b bg-white/50 dark:bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+  <div class="h-screen flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 overflow-hidden">
+    <header class="border-b bg-white/50 dark:bg-slate-900/50 backdrop-blur-md sticky top-0 z-50 flex-shrink-0">
       <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">T</div>
@@ -37,7 +37,7 @@ const switchLanguage = () => {
       </div>
     </header>
 
-    <main class="max-w-7xl mx-auto p-6">
+    <main class="flex-1 max-w-7xl mx-auto p-6 w-full overflow-hidden">
       <slot />
     </main>
   </div>

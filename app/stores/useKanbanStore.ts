@@ -1,30 +1,51 @@
 import { defineStore } from 'pinia';
-import { useLocalStorage } from '@vueuse/core';
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import type { Task, TaskPriority, TaskStatus } from '../types/kanban';
 
 export const useKanbanStore = defineStore('kanban', () => {
-  const tasks = useLocalStorage<Task[]>('tattoox-kanban-tasks', [
-    {
-      id: '1',
-      title: 'Welcome to Tattoox Kanban',
-      description: 'This is an enterprise-grade Kanban board built with Nuxt 4.',
-      status: 'TODO',
-      priority: 'MEDIUM',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      title: 'Explore the features',
-      description: 'Try adding, editing, and moving tasks between columns.',
-      status: 'IN_PROGRESS',
-      priority: 'HIGH',
-      createdAt: new Date().toISOString(),
-    }
-  ]);
+  // State initialized as empty; hydration happens via loadTasks()
+  const tasks = ref<Task[]>([]);
+
+  // Local Storage Key
+  const STORAGE_KEY = 'tattoox-kanban-tasks';
 
   function tasksByStatus(status: string) {
     return tasks.value.filter(t => t.status === status && !t.isArchived);
+  }
+
+  // Persistence helpers
+  function saveToLocal() {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks.value));
+    }
+  }
+
+  function loadFromLocal() {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          tasks.value = JSON.parse(saved);
+        } catch (e) {
+          console.error('Failed to parse local storage tasks', e);
+        }
+      }
+    }
+  }
+
+  async function loadTasks() {
+    try {
+      // Try to fetch from server first (Server-First)
+      const serverTasks = await $fetch<Task[]>('/api/graphql');
+      if (serverTasks && Array.isArray(serverTasks)) {
+        tasks.value = serverTasks;
+        saveToLocal(); // Sync server state to local storage
+        console.log('Tasks loaded from server');
+      }
+    } catch (e) {
+      console.warn('Server unavailable, falling back to local storage');
+      loadFromLocal();
+    }
   }
 
   async function addTask(taskInput: { title: string; description: string; status: TaskStatus; priority: TaskPriority }) {
@@ -34,7 +55,8 @@ export const useKanbanStore = defineStore('kanban', () => {
       createdAt: new Date().toISOString(),
     };
     
-    tasks.value.push(newTask);
+    tasks.value = [...tasks.value, newTask];
+    saveToLocal();
     
     try {
       await $fetch('/api/graphql', {
@@ -49,10 +71,7 @@ export const useKanbanStore = defineStore('kanban', () => {
   }
 
   async function updateTask(input: Partial<Task> & { id: string }) {
-    const index = tasks.value.findIndex(t => t.id === input.id);
-    if (index === -1) return;
-
-    const task = tasks.value[index];
+    const task = tasks.value.find(t => t.id === input.id);
     if (!task) return;
 
     const updatedTask: Task = {
@@ -65,7 +84,8 @@ export const useKanbanStore = defineStore('kanban', () => {
       createdAt: task.createdAt,
     };
 
-    tasks.value[index] = updatedTask;
+    tasks.value = tasks.value.map(t => t.id === input.id ? updatedTask : t);
+    saveToLocal();
 
     try {
       await $fetch('/api/graphql', {
@@ -81,6 +101,7 @@ export const useKanbanStore = defineStore('kanban', () => {
 
   async function deleteTask(id: string) {
     tasks.value = tasks.value.filter(t => t.id !== id);
+    saveToLocal();
     
     try {
       await $fetch('/api/graphql', {
@@ -97,8 +118,8 @@ export const useKanbanStore = defineStore('kanban', () => {
     if (!task) return;
 
     const updatedTask = { ...task, isArchived: true };
-    const index = tasks.value.indexOf(task);
-    tasks.value[index] = updatedTask;
+    tasks.value = tasks.value.map(t => t.id === id ? updatedTask : t);
+    saveToLocal();
 
     try {
       await $fetch('/api/graphql', {
@@ -116,8 +137,8 @@ export const useKanbanStore = defineStore('kanban', () => {
     if (!task) return;
 
     const updatedTask = { ...task, isArchived: false };
-    const index = tasks.value.indexOf(task);
-    tasks.value[index] = updatedTask;
+    tasks.value = tasks.value.map(t => t.id === id ? updatedTask : t);
+    saveToLocal();
 
     try {
       await $fetch('/api/graphql', {
@@ -137,23 +158,37 @@ export const useKanbanStore = defineStore('kanban', () => {
     const isMovingToArchive = newStatus === 'ARCHIVE';
     const isMovingFromArchive = task.isArchived;
 
-    if (isMovingToArchive) {
-      return await archiveTask(taskId);
-    }
+    const updatedTask = { 
+      ...task, 
+      status: newStatus as TaskStatus, 
+      isArchived: isMovingToArchive 
+    };
 
-    if (isMovingFromArchive) {
-      await unarchiveTask(taskId);
-    }
+    tasks.value = tasks.value.map(t => t.id === taskId ? updatedTask : t);
+    saveToLocal();
 
-    return await updateTask({ 
-      id: taskId, 
-      status: newStatus as TaskStatus 
-    });
+    try {
+      if (isMovingToArchive) {
+        await archiveTask(taskId);
+      } else if (isMovingFromArchive) {
+        await unarchiveTask(taskId);
+      } else {
+        await $fetch('/api/graphql', {
+          method: 'PUT',
+          body: updatedTask,
+        });
+      }
+    } catch (e) {
+      console.warn('Server sync failed during moveTask, but local state is preserved', e);
+    }
+    
+    return updatedTask;
   }
 
   return {
     tasks,
     tasksByStatus,
+    loadTasks,
     addTask,
     updateTask,
     deleteTask,
