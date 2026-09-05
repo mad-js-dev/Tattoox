@@ -64,7 +64,8 @@ const isColumnVisible = (colId: string) => {
   if (isMobile) {
     return true;
   } else {
-    if (colId === 'ARCHIVE') return showArchive.value;
+    // Archive is always "visible" to the DOM to allow GSAP animations, 
+    // but its visual state is controlled via classes.
     return true;
   }
 };
@@ -190,7 +191,7 @@ const onDragEnd = (evt: any) => {
 
 const scrollIntoArchive = () => {
   if (!boardContainer.value) return;
-  const archiveCol = boardContainer.value.querySelector('[data-col-id=\"ARCHIVE\"]') as HTMLElement;
+  const archiveCol = boardContainer.value.querySelector('[data-col-id="ARCHIVE"]') as HTMLElement;
   if (archiveCol) {
     gsap.to(boardContainer.value, {
       scrollLeft: archiveCol.offsetLeft,
@@ -198,6 +199,15 @@ const scrollIntoArchive = () => {
       ease: 'power2.out',
       overwrite: true
     });
+  }
+};
+
+const onArchiveToggle = async (val: boolean) => {
+  showArchive.value = val;
+  if (val) {
+    setTimeout(() => {
+      scrollIntoArchive();
+    }, 50);
   }
 };
 </script>
@@ -214,12 +224,7 @@ const scrollIntoArchive = () => {
         <!-- Desktop Archive Toggle -->
         <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800">
           <span class="text-xs font-medium">{{ $t('board.show_archive') }}</span>
-          <Switch :checked="showArchive" @update:checked="(val: boolean) => { 
-            showArchive = val; 
-            if (val) {
-              scrollIntoArchive();
-            }
-          }" />
+          <Switch :checked="showArchive" @update:checked="onArchiveToggle" />
         </div>
 
         <Dialog v-model:open="isDialogOpen">
@@ -294,13 +299,14 @@ const scrollIntoArchive = () => {
 
     <div 
       ref="boardContainer"
-      class="flex flex-row gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth w-full no-scrollbar flex-1 min-h-0"
+      class="flex flex-row gap-6 overflow-x-hidden snap-x snap-mandatory scroll-smooth w-full no-scrollbar flex-1 min-h-0"
     >
       <div 
         v-for="col in columns" 
         :key="col.id" 
         :data-col-id="col.id"
-        class="kanban-column flex flex-col gap-2 flex-1 min-w-full md:min-w-0 snap-center whitespace-normal h-full"
+        class="kanban-column flex flex-col gap-2 flex-1 min-w-full md:min-w-0 snap-center whitespace-normal h-full transition-all duration-500 ease-in-out"
+        :class="{ 'max-w-0 p-0 overflow-hidden opacity-0 pointer-events-none': col.id === 'ARCHIVE' && !showArchive, 'max-w-full': col.id === 'ARCHIVE' && showArchive }"
         v-show="isColumnVisible(col.id)"
       >
         <div class="flex items-center justify-between px-2 flex-shrink-0">
@@ -312,7 +318,7 @@ const scrollIntoArchive = () => {
           </div>
         </div>
 
-        <div :class="['flex flex-col gap-2 p-2 rounded-xl border-2 border-dashed overflow-y-auto flex-1 relative', col.color]"
+        <div :class="['flex flex-col gap-2 p-2 rounded-xl border-2 border-dashed flex-1 relative', col.color, { 'overflow-y-auto': col.id !== 'ARCHIVE' || showArchive, 'overflow-hidden': col.id === 'ARCHIVE' && !showArchive }]"
              style="min-height: 150px;">
           <VueDraggable
             :model-value="(col.id === 'ARCHIVE' ? store.archivedTasks : store.tasksByStatus(col.id))"

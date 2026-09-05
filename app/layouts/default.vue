@@ -18,7 +18,7 @@ const switchLanguage = () => {
     <header class="border-b bg-white/50 dark:bg-slate-900/50 backdrop-blur-md sticky top-0 z-50 flex-shrink-0">
       <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">T</div>
+          <div class="w-8 h-8 border-2 border-primary rounded-lg flex items-center justify-center text-primary font-bold">T</div>
           <span class="text-xl font-bold tracking-tight">Tattoox <span class="text-primary text-sm font-medium">Kanban</span></span>
         </div>
 
