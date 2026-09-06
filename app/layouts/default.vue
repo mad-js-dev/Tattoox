@@ -15,8 +15,8 @@ const switchLanguage = () => {
 </script>
 
 <template>
-  <div class="h-screen flex flex-col text-slate-900 dark:text-slate-100 transition-colors duration-300 overflow-hidden">
-    <WebGLTestBackground />
+  <div class="h-screen flex flex-col text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-950 transition-colors duration-300 overflow-hidden">
+    <!-- <WebGLTestBackground /> -->
     <header class="border-b bg-white/50 dark:bg-slate-900/50 backdrop-blur-md sticky top-0 z-50 flex-shrink-0">
       <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <div class="flex items-center gap-2">
@@ -32,8 +32,10 @@ const switchLanguage = () => {
 
           <!-- Theme Toggle -->
           <Button variant="ghost" size="icon" @click="toggleDark()" class="w-9 h-9">
-            <span v-if="isDark">☀️</span>
-            <span v-else>🌙</span>
+            <ClientOnly>
+              <span v-if="isDark">☀️</span>
+              <span v-else>🌙</span>
+            </ClientOnly>
           </Button>
         </div>
       </div>

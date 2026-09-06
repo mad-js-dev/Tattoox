@@ -1,220 +1,7 @@
-<script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
-import { useKanbanStore } from '@/stores/useKanbanStore';
-import { useRouter } from 'vue-router';
-import { VueDraggable } from 'vue-draggable-plus';
-import gsap from 'gsap';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus } from 'lucide-vue-next';
-import Tabs from '@/components/ui/tabs/Tabs.vue';
-import TabsList from '@/components/ui/tabs/TabsList.vue';
-import TabsTrigger from '@/components/ui/tabs/TabsTrigger.vue';
-import Switch from '@/components/ui/switch/Switch.vue';
-import { useI18n } from 'vue-i18n';
-
-const { t } = useI18n();
-const store = useKanbanStore();
-const router = useRouter();
-const isDialogOpen = ref(false);
-
-// Navigation state
-const activeColumn = ref('TODO');
-const showArchive = ref(false);
-
-const newTask = ref({
-  title: '',
-  description: '',
-  status: 'TODO',
-  priority: 'MEDIUM'
-});
-
-const handleAddTask = async () => {
-  if (!newTask.value.title) return;
-  await store.addTask({
-    title: newTask.value.title,
-    description: newTask.value.description,
-    status: newTask.value.status as any,
-    priority: newTask.value.priority as any,
-  });
-  newTask.value = { title: '', description: '', status: 'TODO', priority: 'MEDIUM' };
-  isDialogOpen.value = false;
-};
-
-const columns = computed(() => [
-  { id: 'TODO', label: t('statuses.TODO'), color: 'bg-slate-100 dark:bg-slate-900' },
-  { id: 'IN_PROGRESS', label: t('statuses.IN_PROGRESS'), color: 'bg-blue-50 dark:bg-blue-900/20' },
-  { id: 'DONE', label: t('statuses.DONE'), color: 'bg-green-50 dark:bg-green-900/20' },
-  { id: 'ARCHIVE', label: t('board.archive'), color: 'bg-slate-50 dark:bg-slate-800/50' },
-]);
-
-const priorityColors: Record<string, string> = {
-  LOW: 'bg-slate-400 text-white',
-  MEDIUM: 'bg-yellow-500 text-white',
-  HIGH: 'bg-red-500 text-white',
-};
-
-const isColumnVisible = (colId: string) => {
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  if (isMobile) {
-    return true;
-  } else {
-    // Archive is always "visible" to the DOM to allow GSAP animations, 
-    // but its visual state is controlled via classes.
-    return true;
-  }
-};
-
-const boardContainer = ref<HTMLElement | null>(null);
-
-// Intersection Observer to sync activeColumn with the visible column on mobile
-let observer: IntersectionObserver | null = null;
-
-onMounted(async () => {
-  // 1. Hydrate store from server/local first
-  await store.loadTasks();
-
-  if (typeof window === 'undefined' || window.innerWidth >= 768) return;
-
-  observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const colId = entry.target.getAttribute('data-col-id');
-        if (colId) {
-          activeColumn.value = colId;
-        }
-      }
-    });
-  }, {
-    threshold: 0.6, // Trigger when 60% of the column is visible
-  });
-
-  // Observe all columns
-  const columns = document.querySelectorAll('.kanban-column');
-  columns.forEach((col) => observer?.observe(col));
-});
-
-onUnmounted(() => {
-  observer?.disconnect();
-});
-
-watch(activeColumn, (newCol) => {
-  if (typeof window === 'undefined' || window.innerWidth >= 768) return;
-  const colIndex = columns.value.findIndex(col => col.id === newCol);
-  if (colIndex === -1 || !boardContainer.value) return;
-  const columnElements = boardContainer.value.querySelectorAll('.kanban-column');
-  const targetElement = columnElements[colIndex] as HTMLElement;
-  if (targetElement) {
-    gsap.to(boardContainer.value, {
-      scrollLeft: targetElement.offsetLeft,
-      duration: 0.6,
-      ease: 'power2.out',
-      overwrite: true
-    });
-  }
-});
-
-const onTaskMove = async (evt: any, newStatus: string) => {
-  console.log('onTaskMove triggered:', { evt, newStatus });
-  
-  const data = evt.detail || evt;
-  
-  // Based on your logs: data is a CustomEvent with { to, from, item, ... }
-  // Movement between columns is indicated when 'to' and 'from' are different
-  const isColumnChange = data.to && data.from && data.to !== data.from;
-  const isAdded = data.added;
-  
-  if (isAdded || isColumnChange) {
-    console.log('Movement detected. New status:', newStatus);
-    
-    // The element is usually in data.item or data.added
-    const draggedElement = data.added?.element || data.added || data.item || evt.item;
-    
-    if (!draggedElement) {
-      console.error('Could not find the dragged element in event data');
-      return;
-    }
-
-    // Look for data-id on the element or its closest parent/child
-    const taskId = draggedElement.getAttribute?.('data-id') || 
-                   draggedElement.closest?.('[data-id]')?.getAttribute('data-id') ||
-                   draggedElement.querySelector?.('[data-id]')?.getAttribute('data-id') || 
-                   draggedElement['data-id'];
-    
-    console.log('Resolved Task ID:', taskId);
-    if (!taskId) {
-      console.error('No task ID found on the dragged element', draggedElement);
-      return;
-    }
-    
-    try {
-      await store.moveTask(taskId, newStatus);
-      console.log('Successfully moved task', taskId, 'to', newStatus);
-    } catch (e) {
-      console.error('Store moveTask failed:', e);
-    } finally {
-      if (typeof window !== 'undefined' && window.innerWidth < 768) {
-        activeColumn.value = newStatus;
-      }
-    }
-  } else if (data.moved || (data.item && data.to === data.from)) {
-    console.log('Item moved within the same column:', newStatus);
-  } else {
-    console.log('onTaskMove triggered but no recognized movement pattern found:', data);
-  }
-};
-
-const onDragStart = (evt: any) => {
-  gsap.to(evt.item, {
-    scale: 1.05,
-    boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-    duration: 0.3,
-    ease: 'power2.out',
-    zIndex: 1000
-  });
-};
-
-const onDragEnd = (evt: any) => {
-  gsap.to(evt.item, {
-    scale: 1,
-    boxShadow: 'none',
-    duration: 0.3,
-    ease: 'power2.in',
-    zIndex: 1
-  });
-};
-
-const scrollIntoArchive = () => {
-  if (!boardContainer.value) return;
-  const archiveCol = boardContainer.value.querySelector('[data-col-id="ARCHIVE"]') as HTMLElement;
-  if (archiveCol) {
-    gsap.to(boardContainer.value, {
-      scrollLeft: archiveCol.offsetLeft,
-      duration: 0.6,
-      ease: 'power2.out',
-      overwrite: true
-    });
-  }
-};
-
-const onArchiveToggle = async (val: boolean) => {
-  showArchive.value = val;
-  if (val) {
-    setTimeout(() => {
-      scrollIntoArchive();
-    }, 50);
-  }
-};
-</script>
-
 <template>
   <div class="space-y-6 h-full flex flex-col">
-    <div class="flex flex-row justify-between items-center gap-4 flex-shrink-0">
+    <!-- Board Header Panel -->
+    <div class="flex flex-row justify-between items-center gap-4 flex-shrink-0 p-4 rounded-2xl glass-primary shadow-lg border border-white/10 dark:border-white/5">
       <div>
         <h2 class="text-3xl font-bold tracking-tight">{{ $t('board.title') }}</h2>
         <p class="text-muted-foreground">{{ $t('board.subtitle') }}</p>
@@ -222,7 +9,7 @@ const onArchiveToggle = async (val: boolean) => {
       
       <div class="flex items-center gap-4 flex-shrink-0">
         <!-- Desktop Archive Toggle -->
-        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800">
+        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100/50 dark:bg-slate-800/50">
           <span class="text-xs font-medium">{{ $t('board.show_archive') }}</span>
           <Switch :checked="showArchive" @update:checked="onArchiveToggle" />
         </div>
@@ -305,11 +92,11 @@ const onArchiveToggle = async (val: boolean) => {
         v-for="col in columns" 
         :key="col.id" 
         :data-col-id="col.id"
-        class="kanban-column flex flex-col gap-2 flex-1 min-w-full md:min-w-0 snap-center whitespace-normal h-full transition-all duration-500 ease-in-out"
+        class="kanban-column flex flex-col gap-0 flex-1 min-w-full md:min-w-0 snap-center whitespace-normal h-full transition-all duration-500 ease-in-out glass-utility rounded-2xl shadow-lg border border-white/10 dark:border-white/5"
         :class="{ 'max-w-0 p-0 overflow-hidden opacity-0 pointer-events-none': col.id === 'ARCHIVE' && !showArchive, 'max-w-full': col.id === 'ARCHIVE' && showArchive }"
         v-show="isColumnVisible(col.id)"
       >
-        <div class="flex items-center justify-between px-2 flex-shrink-0">
+        <div class="flex items-center justify-between px-4 py-3 flex-shrink-0 border-b border-white/10 dark:border-white/5">
           <div class="flex items-center gap-2">
             <h3 class="font-semibold text-lg">{{ col.label }}</h3>
             <Badge variant="outline" class="rounded-full">
@@ -318,7 +105,7 @@ const onArchiveToggle = async (val: boolean) => {
           </div>
         </div>
 
-        <div :class="['flex flex-col gap-2 p-2 rounded-xl border-2 border-dashed flex-1 relative', col.color, { 'overflow-y-auto': col.id !== 'ARCHIVE' || showArchive, 'overflow-hidden': col.id === 'ARCHIVE' && !showArchive }]"
+        <div :class="['flex flex-col gap-2 p-4 rounded-b-2xl flex-1 relative', col.color, { 'overflow-y-auto': col.id !== 'ARCHIVE' || showArchive, 'overflow-hidden': col.id === 'ARCHIVE' && !showArchive }]"
              style="min-height: 150px;">
           <VueDraggable
             :model-value="(col.id === 'ARCHIVE' ? store.archivedTasks : store.tasksByStatus(col.id))"
@@ -399,13 +186,199 @@ const onArchiveToggle = async (val: boolean) => {
   </div>
 </template>
 
+<script setup lang="ts">
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { useKanbanStore } from '@/stores/useKanbanStore';
+import { useRouter } from 'vue-router';
+import { VueDraggable } from 'vue-draggable-plus';
+import gsap from 'gsap';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus } from 'lucide-vue-next';
+import Tabs from '@/components/ui/tabs/Tabs.vue';
+import TabsList from '@/components/ui/tabs/TabsList.vue';
+import TabsTrigger from '@/components/ui/tabs/TabsTrigger.vue';
+import Switch from '@/components/ui/switch/Switch.vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+const store = useKanbanStore();
+const router = useRouter();
+const isDialogOpen = ref(false);
+
+// Navigation state
+const activeColumn = ref('TODO');
+const showArchive = ref(false);
+
+const newTask = ref({
+  title: '',
+  description: '',
+  status: 'TODO',
+  priority: 'MEDIUM'
+});
+
+const handleAddTask = async () => {
+  if (!newTask.value.title) return;
+  await store.addTask({
+    title: newTask.value.title,
+    description: newTask.value.description,
+    status: newTask.value.status as any,
+    priority: newTask.value.priority as any,
+  });
+  newTask.value = { title: '', description: '', status: 'TODO', priority: 'MEDIUM' };
+  isDialogOpen.value = false;
+};
+
+const columns = computed(() => [
+  { id: 'TODO', label: t('statuses.TODO'), color: 'bg-transparent' },
+  { id: 'IN_PROGRESS', label: t('statuses.IN_PROGRESS'), color: 'bg-transparent' },
+  { id: 'DONE', label: t('statuses.DONE'), color: 'bg-transparent' },
+  { id: 'ARCHIVE', label: t('board.archive'), color: 'bg-transparent' },
+]);
+
+const priorityColors: Record<string, string> = {
+  LOW: 'bg-slate-400 text-white',
+  MEDIUM: 'bg-yellow-500 text-white',
+  HIGH: 'bg-red-500 text-white',
+};
+
+const isColumnVisible = (colId: string) => {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  if (isMobile) {
+    return true;
+  } else {
+    return true;
+  }
+};
+
+const boardContainer = ref<HTMLElement | null>(null);
+
+// Intersection Observer to sync activeColumn with the visible column on mobile
+let observer: IntersectionObserver | null = null;
+
+onMounted(async () => {
+  await store.loadTasks();
+
+  if (typeof window === 'undefined' || window.innerWidth >= 768) return;
+
+  observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const colId = entry.target.getAttribute('data-col-id');
+        if (colId) {
+          activeColumn.value = colId;
+        }
+      }
+    });
+  }, {
+    threshold: 0.6,
+  });
+
+  const columns = document.querySelectorAll('.kanban-column');
+  columns.forEach((col) => observer?.observe(col));
+});
+
+onUnmounted(() => {
+  observer?.disconnect();
+});
+
+watch(activeColumn, (newCol) => {
+  if (typeof window === 'undefined' || window.innerWidth >= 768) return;
+  const colIndex = columns.value.findIndex(col => col.id === newCol);
+  if (colIndex === -1 || !boardContainer.value) return;
+  const columnElements = boardContainer.value.querySelectorAll('.kanban-column');
+  const targetElement = columnElements[colIndex] as HTMLElement;
+  if (targetElement) {
+    gsap.to(boardContainer.value, {
+      scrollLeft: targetElement.offsetLeft,
+      duration: 0.6,
+      ease: 'power2.out',
+      overwrite: true
+    });
+  }
+});
+
+const onTaskMove = async (evt: any, newStatus: string) => {
+  const data = evt.detail || evt;
+  const isColumnChange = data.to && data.from && data.to !== data.from;
+  const isAdded = data.added;
+  
+  if (isAdded || isColumnChange) {
+    const draggedElement = data.added?.element || data.added || data.item || evt.item;
+    if (!draggedElement) return;
+    const taskId = draggedElement.getAttribute?.('data-id') || 
+                   draggedElement.closest?.('[data-id]')?.getAttribute('data-id') ||
+                   draggedElement.querySelector?.('[data-id]')?.getAttribute('data-id') || 
+                   draggedElement['data-id'];
+    if (!taskId) return;
+    try {
+      await store.moveTask(taskId, newStatus);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      if (typeof window !== 'undefined' && window.innerWidth < 768) {
+        activeColumn.value = newStatus;
+      }
+    }
+  } else if (data.moved || (data.item && data.to === data.from)) {
+  } else {
+  }
+};
+
+const onDragStart = (evt: any) => {
+  gsap.to(evt.item, {
+    scale: 1.05,
+    boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+    duration: 0.3,
+    ease: 'power2.out',
+    zIndex: 1000
+  });
+};
+
+const onDragEnd = (evt: any) => {
+  gsap.to(evt.item, {
+    scale: 1,
+    boxShadow: 'none',
+    duration: 0.3,
+    ease: 'power2.in',
+    zIndex: 1
+  });
+};
+
+const scrollIntoArchive = () => {
+  if (!boardContainer.value) return;
+  const archiveCol = boardContainer.value.querySelector('[data-col-id=\"ARCHIVE\"]') as HTMLElement;
+  if (archiveCol) {
+    gsap.to(boardContainer.value, {
+      scrollLeft: archiveCol.offsetLeft,
+      duration: 0.6,
+      ease: 'power2.out',
+      overwrite: true
+    });
+  }
+};
+
+const onArchiveToggle = async (val: boolean) => {
+  showArchive.value = val;
+  if (val) {
+    setTimeout(() => {
+      scrollIntoArchive();
+    }, 50);
+  }
+};
+</script>
+
 <style scoped>
 .draggable-ghost {
   opacity: 0.5 !important;
   background-color: #e2e8f0 !important;
 }
 
-/* Custom thin scrollbars for columns */
 .overflow-y-auto::-webkit-scrollbar {
   width: 6px;
 }
