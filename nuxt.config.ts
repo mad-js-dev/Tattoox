@@ -23,7 +23,7 @@ export default defineNuxtConfig({
       { code: 'en', iso: 'en-US', name: 'English', file: 'en.json' },
       { code: 'es', iso: 'es-ES', name: 'Español', file: 'es.json' }
     ],
-    langDir: 'locales/',
+    langDir: '/home/maribel/Documentos/Tattoox/app/locales',
   },
   typescript: {
     strict: true,

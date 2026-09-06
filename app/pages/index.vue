@@ -3,14 +3,14 @@
     <!-- Board Header Panel -->
     <div class="flex flex-row justify-between items-center gap-4 flex-shrink-0 p-4 rounded-2xl glass-primary shadow-lg border border-white/10 dark:border-white/5">
       <div>
-        <h2 class="text-3xl font-bold tracking-tight">{{ $t('board.title') }}</h2>
-        <p class="text-muted-foreground">{{ $t('board.subtitle') }}</p>
+        <h2 class="text-3xl font-bold tracking-tight">{{ t('board.title') }}</h2>
+        <p class="text-muted-foreground">{{ t('board.subtitle') }}</p>
       </div>
       
       <div class="flex items-center gap-4 flex-shrink-0">
         <!-- Desktop Archive Toggle -->
         <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100/50 dark:bg-slate-800/50">
-          <span class="text-xs font-medium">{{ $t('board.show_archive') }}</span>
+          <span class="text-xs font-medium">{{ t('board.show_archive') }}</span>
           <Switch :checked="showArchive" @update:checked="onArchiveToggle" />
         </div>
 
@@ -18,55 +18,55 @@
           <DialogTrigger as-child>
             <Button class="gap-2">
               <Plus class="w-4 h-4" />
-              {{ $t('board.new_task') }}
+              {{ t('board.new_task') }}
             </Button>
           </DialogTrigger>
           <DialogContent class="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>{{ $t('task.create_title') }}</DialogTitle>
-              <DialogDescription>{{ $t('task.create_description') }}</DialogDescription>
+              <DialogTitle>{{ t('task.create_title') }}</DialogTitle>
+              <DialogDescription>{{ t('task.create_description') }}</DialogDescription>
             </DialogHeader>
             <div class="grid gap-4 py-4">
               <div class="grid gap-2">
-                <label class="text-sm font-medium">{{ $t('task.title') }}</label>
-                <Input v-model="newTask.title" :placeholder="$t('task.title_placeholder')" />
+                <label class="text-sm font-medium">{{ t('task.title') }}</label>
+                <Input v-model="newTask.title" :placeholder="t('task.title_placeholder')" />
               </div>
               <div class="grid gap-2">
-                <label class="text-sm font-medium">{{ $t('task.description') }}</label>
-                <Textarea v-model="newTask.description" :placeholder="$t('task.description_placeholder')" />
+                <label class="text-sm font-medium">{{ t('task.description') }}</label>
+                <Textarea v-model="newTask.description" :placeholder="t('task.description_placeholder')" />
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div class="grid gap-2">
-                  <label class="text-sm font-medium">{{ $t('task.priority') }}</label>
+                  <label class="text-sm font-medium">{{ t('task.priority') }}</label>
                   <Select v-model="newTask.priority">
                     <SelectTrigger>
-                      <SelectValue :placeholder="$t('task.priority_placeholder')" />
+                      <SelectValue :placeholder="t('task.priority_placeholder')" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="LOW">{{ $t('priorities.LOW') }}</SelectItem>
-                      <SelectItem value="MEDIUM">{{ $t('priorities.MEDIUM') }}</SelectItem>
-                      <SelectItem value="HIGH">{{ $t('priorities.HIGH') }}</SelectItem>
+                      <SelectItem value="LOW">{{ t('priorities.LOW') }}</SelectItem>
+                      <SelectItem value="MEDIUM">{{ t('priorities.MEDIUM') }}</SelectItem>
+                      <SelectItem value="HIGH">{{ t('priorities.HIGH') }}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div class="grid gap-2">
-                  <label class="text-sm font-medium">{{ $t('task.status') }}</label>
+                  <label class="text-sm font-medium">{{ t('task.status') }}</label>
                   <Select v-model="newTask.status">
                     <SelectTrigger>
-                      <SelectValue :placeholder="$t('task.status_placeholder')" />
+                      <SelectValue :placeholder="t('task.status_placeholder')" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="TODO">{{ $t('statuses.TODO') }}</SelectItem>
-                      <SelectItem value="IN_PROGRESS">{{ $t('statuses.IN_PROGRESS') }}</SelectItem>
-                      <SelectItem value="DONE">{{ $t('statuses.DONE') }}</SelectItem>
+                      <SelectItem value="TODO">{{ t('statuses.TODO') }}</SelectItem>
+                      <SelectItem value="IN_PROGRESS">{{ t('statuses.IN_PROGRESS') }}</SelectItem>
+                      <SelectItem value="DONE">{{ t('statuses.DONE') }}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" @click="isDialogOpen = false">{{ $t('task.cancel') }}</Button>
-              <Button @click="handleAddTask">{{ $t('board.create_task') }}</Button>
+              <Button variant="outline" @click="isDialogOpen = false">{{ t('task.cancel') }}</Button>
+              <Button @click="handleAddTask">{{ t('board.create_task') }}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -130,7 +130,7 @@
                 <CardHeader class="p-3 pb-1">
                   <div class="flex justify-between items-start mb-2">
                     <Badge :class="priorityColors[task.priority]" class="text-[10px] uppercase font-bold">
-                      {{ $t('priorities.' + task.priority) }}
+                      {{ t('priorities.' + task.priority) }}
                     </Badge>
                     <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                        <Button variant="ghost" size="icon" class="w-6 h-6" @click.stop="col.id === 'ARCHIVE' ? store.unarchiveTask(task.id) : store.archiveTask(task.id)">
@@ -178,7 +178,7 @@
           </VueDraggable>
           
           <div v-if="(col.id === 'ARCHIVE' ? store.archivedTasks : store.tasksByStatus(col.id)).length === 0" class="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm italic opacity-50 pointer-events-none">
-            {{ $t('board.no_tasks') }}
+            {{ t('board.no_tasks') }}
           </div>
         </div>
       </div>
