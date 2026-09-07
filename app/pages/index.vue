@@ -87,6 +87,8 @@
     <div 
       ref="boardContainer"
       class="flex flex-row gap-0 overflow-x-hidden snap-x snap-mandatory scroll-smooth w-full no-scrollbar flex-1 min-h-0"
+      @touchstart="handleTouchStart"
+      @touchend="handleTouchEnd"
     >
       <template v-for="col in visibleColumns" :key="col.id">
         <div 
@@ -117,7 +119,7 @@
               @start="onDragStart"
               @end="onDragEnd"
               @change="(evt) => onTaskMove(evt, col.id)"
-              :disabled="false"
+              :disabled="isDragDisabled"
               class="h-full w-full"
             >
               <div 
@@ -215,6 +217,7 @@ const isDialogOpen = ref(false);
 // Navigation state
 const activeColumn = ref('TODO');
 const isProgrammaticScrolling = ref(false);
+const isDragDisabled = ref(false);
 const showArchive = ref(false);
 const isArchiveVisibleInDom = ref(showArchive.value);
 const archiveContentVisible = ref(false);
@@ -266,6 +269,33 @@ const isColumnVisible = (colId: string) => {
 
 const boardContainer = ref<HTMLElement | null>(null);
 
+const touchStartX = ref(0);
+const touchEndX = ref(0);
+
+const handleTouchStart = (e: TouchEvent) => {
+  if (e.touches && e.touches[0]) {
+    touchStartX.value = e.touches[0].clientX;
+  }
+};
+
+const handleTouchEnd = (e: TouchEvent) => {
+  if (!e.changedTouches || !e.changedTouches[0]) return;
+  touchEndX.value = e.changedTouches[0].clientX;
+  const diff = touchStartX.value - touchEndX.value;
+  const threshold = 50; // minimum swipe distance in pixels
+
+  if (Math.abs(diff) > threshold) {
+    const currentIndex = columns.value.findIndex(col => col.id === activeColumn.value);
+    if (diff > 0 && currentIndex !== -1 && currentIndex < columns.value.length - 1) {
+      const nextCol = columns.value[currentIndex + 1];
+      if (nextCol) activeColumn.value = nextCol.id;
+    } else if (diff < 0 && currentIndex > 0) {
+      const prevCol = columns.value[currentIndex - 1];
+      if (prevCol) activeColumn.value = prevCol.id;
+    }
+  }
+};
+
 const archiveRef = ref<HTMLElement | null>(null);
 
 // Intersection Observer to sync activeColumn with the visible column on mobile
@@ -274,7 +304,14 @@ let observer: IntersectionObserver | null = null;
 onMounted(async () => {
   await store.loadTasks();
 
-  if (typeof window === 'undefined' || window.innerWidth >= 768) return;
+  if (typeof window === 'undefined') return;
+  
+  const isMobile = window.innerWidth < 768;
+  if (isMobile) {
+    isDragDisabled.value = true;
+  }
+
+  if (window.innerWidth >= 768) return;
 
   observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
@@ -358,6 +395,7 @@ const onTaskMove = async (evt: any, newStatus: string) => {
       console.error(e);
     } finally {
       if (typeof window !== 'undefined' && window.innerWidth < 768) {
+        isProgrammaticScrolling.value = true;
         activeColumn.value = newStatus;
       }
     }
