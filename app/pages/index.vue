@@ -158,7 +158,7 @@
                           variant="ghost" 
                           size="sm" 
                           class="h-7 px-2 text-xs"
-                          @click.stop="store.updateTask({ id: task.id, status: 'TODO' })"
+                          @click.stop="moveTaskAndSync(task.id, 'TODO')"
                         >
                           ←
                         </Button>
@@ -167,7 +167,7 @@
                           variant="ghost" 
                           size="sm" 
                           class="h-7 px-2 text-xs"
-                          @click.stop="store.updateTask({ id: task.id, status: 'DONE' })"
+                          @click.stop="moveTaskAndSync(task.id, task.status === 'TODO' ? 'IN_PROGRESS' : 'DONE')"
                         >
                           →
                         </Button>
@@ -214,6 +214,7 @@ const isDialogOpen = ref(false);
 
 // Navigation state
 const activeColumn = ref('TODO');
+const isProgrammaticScrolling = ref(false);
 const showArchive = ref(false);
 const isArchiveVisibleInDom = ref(showArchive.value);
 const archiveContentVisible = ref(false);
@@ -277,7 +278,7 @@ onMounted(async () => {
 
   observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
-      if (entry.isIntersecting) {
+      if (entry.isIntersecting && !isProgrammaticScrolling.value) {
         const colId = entry.target.getAttribute('data-col-id');
         if (colId) {
           activeColumn.value = colId;
@@ -314,14 +315,29 @@ watch(activeColumn, (newCol) => {
   const columnElements = boardContainer.value.querySelectorAll('.kanban-column');
   const targetElement = columnElements[colIndex] as HTMLElement;
   if (targetElement) {
+    isProgrammaticScrolling.value = true;
     gsap.to(boardContainer.value, {
       scrollLeft: targetElement.offsetLeft,
       duration: 0.6,
       ease: 'power2.out',
-      overwrite: true
+      overwrite: true,
+      onComplete: () => {
+        // Delay resetting the flag to ensure intersection observer 
+        // doesn't fire for columns we pass over during the scroll.
+        setTimeout(() => {
+          isProgrammaticScrolling.value = false;
+        }, 100);
+      }
     });
   }
 });
+
+const moveTaskAndSync = async (taskId: string, newStatus: any) => {
+  await store.updateTask({ id: taskId, status: newStatus });
+  if (typeof window !== 'undefined' && window.innerWidth < 768) {
+    activeColumn.value = newStatus;
+  }
+};
 
 const onTaskMove = async (evt: any, newStatus: string) => {
   const data = evt.detail || evt;
