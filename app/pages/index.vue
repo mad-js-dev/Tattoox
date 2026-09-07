@@ -21,7 +21,7 @@
               {{ t('board.new_task') }}
             </Button>
           </DialogTrigger>
-          <DialogContent class="sm:max-w-[425px]">
+          <DialogContent class="w-[90vw] max-w-[425px] glass-primary bg-white/70 backdrop-blur-md border-white/80 dark:bg-transparent dark:border-white/10 shadow-2xl mx-auto rounded-2xl">
             <DialogHeader>
               <DialogTitle>{{ t('task.create_title') }}</DialogTitle>
               <DialogDescription>{{ t('task.create_description') }}</DialogDescription>
