@@ -14,14 +14,17 @@
           <Switch v-model="showArchive" />
         </div>
 
-        <Dialog v-model:open="isDialogOpen">
+        <Dialog :open="isDialogOpen" @update:open="handleOpenChange">
           <DialogTrigger as-child>
             <Button class="gap-2">
               <Plus class="w-4 h-4" />
               {{ t('board.new_task') }}
             </Button>
           </DialogTrigger>
-          <DialogContent class="w-[90vw] max-w-[425px] glass-primary bg-white/70 backdrop-blur-md border-white/80 dark:bg-transparent dark:border-white/10 shadow-2xl mx-auto rounded-2xl">
+          <DialogContent 
+            ref="dialogContentRef"
+            class="w-[90vw] max-w-[425px] glass-primary bg-white/70 backdrop-blur-md border-white/80 dark:bg-transparent dark:border-white/10 shadow-2xl mx-auto rounded-2xl"
+          >
             <DialogHeader>
               <DialogTitle>{{ t('task.create_title') }}</DialogTitle>
               <DialogDescription>{{ t('task.create_description') }}</DialogDescription>
@@ -213,6 +216,63 @@ const { t } = useI18n();
 const store = useKanbanStore();
 const router = useRouter();
 const isDialogOpen = ref(false);
+const dialogContentRef = ref<HTMLElement | null>(null);
+
+const handleOpenChange = async (open: boolean) => {
+  if (open) {
+    isDialogOpen.value = true;
+  } else {
+    await closeDialog();
+  }
+};
+
+const closeDialog = async () => {
+  let el = dialogContentRef.value;
+  if (el && (el as any).$el) {
+    el = (el as any).$el;
+  }
+  if (!(el instanceof HTMLElement)) {
+    el = document.querySelector('.glass-primary.bg-white\\/70') as HTMLElement;
+  }
+
+  if (el) {
+    await gsap.to(el, { 
+      scale: 0.9, 
+      opacity: 0, 
+      y: 10, 
+      duration: 0.2, 
+      ease: 'power2.in' 
+    });
+  }
+  isDialogOpen.value = false;
+};
+
+watch(isDialogOpen, async (val) => {
+  if (val) {
+    await nextTick();
+    
+    let el = dialogContentRef.value;
+    if (el && (el as any).$el) {
+      el = (el as any).$el;
+    }
+    
+    if (!(el instanceof HTMLElement)) {
+      el = document.querySelector('.glass-primary.bg-white\\/70') as HTMLElement;
+    }
+
+    if (!el) return;
+
+    gsap.set(el, { scale: 0.9, opacity: 0, y: 20 });
+    
+    gsap.to(el, { 
+      scale: 1, 
+      opacity: 1, 
+      y: 0, 
+      duration: 0.4, 
+      ease: 'back.out(1.7)' 
+    });
+  }
+});
 
 // Navigation state
 const activeColumn = ref('TODO');
