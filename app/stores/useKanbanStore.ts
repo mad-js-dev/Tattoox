@@ -40,7 +40,6 @@ export const useKanbanStore = defineStore('kanban', () => {
       if (serverTasks && Array.isArray(serverTasks)) {
         tasks.value = serverTasks;
         saveToLocal(); // Sync server state to local storage
-        console.log('Tasks loaded from server');
       }
     } catch (e) {
       console.warn('Server unavailable, falling back to local storage');

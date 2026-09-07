@@ -10,7 +10,6 @@ defineProps<{
 const emit = defineEmits(['update:modelValue', 'update:checked'])
 
 const handleCheckedChange = (checked: boolean) => {
-  console.log('Switch checked changed to:', checked);
   emit('update:modelValue', checked);
 }
 </script>
@@ -19,7 +18,6 @@ const handleCheckedChange = (checked: boolean) => {
   <SwitchRoot 
     :checked="modelValue"
     @update:checked="handleCheckedChange"
-    @click="() => console.log('SwitchRoot native click fired!')"
     :class="cn(
       'group peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=unchecked]:bg-slate-200 data-[state=checked]:bg-blue-600 dark:data-[state=unchecked]:bg-slate-700 dark:data-[state=checked]:bg-blue-600',
       classCn

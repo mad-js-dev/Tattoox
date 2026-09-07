@@ -14,35 +14,27 @@ let mousePos = { x: 0, y: 0 };
 let blobs: any[] = [];
 
 onMounted(async () => {
-  console.log('[InkBackground] Mounting...');
   if (typeof window === 'undefined') {
-    console.log('[InkBackground] Server-side render detected, skipping...');
     return;
   }
 
   try {
-    console.log('[InkBackground] Importing pixi.js...');
     const PIXI = await import('pixi.js');
-    console.log('[InkBackground] pixi.js imported successfully');
     
     app = new PIXI.Application();
-    console.log('[InkBackground] Initializing PIXI Application...');
     await app.init({
       resizeTo: window,
       backgroundAlpha: 0,
       antialias: true,
     });
-    console.log('[InkBackground] PIXI Application initialized');
 
     if (container.value) {
-      console.log('[InkBackground] Appending canvas to container...');
       container.value.appendChild(app.canvas);
       app.canvas.style.position = 'absolute';
       app.canvas.style.top = '0';
       app.canvas.style.left = '0';
       app.canvas.style.width = '100vw';
       app.canvas.style.height = '100vh';
-      console.log('[InkBackground] Canvas appended and styled');
     } else {
       console.error('[InkBackground] Container ref is null!');
     }
@@ -55,7 +47,6 @@ onMounted(async () => {
     graphics.fill(0xffffff);
     const texture = app.renderer.generateTexture(graphics);
 
-    console.log(`[InkBackground] Creating ${blobCount} blobs...`);
     for (let i = 0; i < blobCount; i++) {
       const blob = new PIXI.Sprite(texture);
       blob.anchor.set(0.5);
@@ -87,7 +78,6 @@ onMounted(async () => {
         ease: 'sine.inOut'
       });
     }
-    console.log('[InkBackground] Blobs created and animations started');
 
     app.ticker.add(() => {
       for (let i = 0; i < blobs.length; i++) {
@@ -113,15 +103,12 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  console.log('[InkBackground] Unmounting and cleaning up...');
   
   // 1. Stop ALL GSAP animations globally to be absolutely sure no zombies remain
-  console.log('[InkBackground] Killing all GSAP tweens');
   gsap.killTweensOf('*');
 
   // 2. Destroy the PIXI application and its resources
   if (app) {
-    console.log('[InkBackground] Destroying PIXI Application');
     app.destroy(true, { children: true, texture: true });
     app = null;
   }

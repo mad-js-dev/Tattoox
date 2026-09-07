@@ -384,7 +384,6 @@ const scrollIntoArchive = () => {
 };
 
 watch(showArchive, async (val) => {
-  console.log('showArchive changed to:', val);
   if (!boardContainer.value) return;
 
   if (val) {
