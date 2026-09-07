@@ -11,7 +11,7 @@
         <!-- Desktop Archive Toggle -->
         <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100/50 dark:bg-slate-800/50">
           <span class="text-xs font-medium">{{ t('board.show_archive') }}</span>
-          <Switch :checked="showArchive" @update:checked="onArchiveToggle" />
+          <Switch v-model:checked="showArchive" />
         </div>
 
         <Dialog v-model:open="isDialogOpen">
@@ -77,7 +77,7 @@
     <div class="md:hidden flex-shrink-0">
       <Tabs v-model="activeColumn" defaultValue="TODO">
         <TabsList class="w-full justify-start overflow-x-auto">
-          <TabsTrigger v-for="col in columns" :key="col.id" :value="col.id" class="flex-1">
+          <TabsTrigger v-for="col in visibleColumns" :key="col.id" :value="col.id" class="flex-1">
             {{ col.label }}
           </TabsTrigger>
         </TabsList>
@@ -86,108 +86,108 @@
 
     <div 
       ref="boardContainer"
-      class="flex flex-row gap-6 overflow-x-hidden snap-x snap-mandatory scroll-smooth w-full no-scrollbar flex-1 min-h-0"
+      class="flex flex-row gap-12 overflow-x-hidden snap-x snap-mandatory scroll-smooth w-full no-scrollbar flex-1 min-h-0"
     >
-      <div 
-        v-for="col in columns" 
-        :key="col.id" 
-        :data-col-id="col.id"
-        class="kanban-column flex flex-col gap-0 flex-1 min-w-full md:min-w-0 snap-center whitespace-normal h-full transition-all duration-500 ease-in-out glass-utility rounded-2xl shadow-lg border border-white/10 dark:border-white/5"
-        :class="{ 'max-w-0 p-0 overflow-hidden opacity-0 pointer-events-none': col.id === 'ARCHIVE' && !showArchive, 'max-w-full': col.id === 'ARCHIVE' && showArchive }"
-        v-show="isColumnVisible(col.id)"
-      >
-        <div class="flex items-center justify-between px-4 py-3 flex-shrink-0 border-b border-white/10 dark:border-white/5">
-          <div class="flex items-center gap-2">
-            <h3 class="font-semibold text-lg">{{ col.label }}</h3>
-            <Badge variant="outline" class="rounded-full">
-              {{ col.id === 'ARCHIVE' ? store.archivedTasks.length : store.tasksByStatus(col.id).length }}
-            </Badge>
-          </div>
-        </div>
-
-        <div :class="['flex flex-col gap-2 p-4 rounded-b-2xl flex-1 relative', col.color, { 'overflow-y-auto': col.id !== 'ARCHIVE' || showArchive, 'overflow-hidden': col.id === 'ARCHIVE' && !showArchive }]"
-             style="min-height: 150px;">
-          <VueDraggable
-            :model-value="(col.id === 'ARCHIVE' ? store.archivedTasks : store.tasksByStatus(col.id))"
-            group="tasks"
-            ghost-class="draggable-ghost"
-            :animation="200"
-            :key="col.id + (col.id === 'ARCHIVE' ? store.archivedTasks.length : store.tasksByStatus(col.id).length)"
-            @start="onDragStart"
-            @end="onDragEnd"
-            @change="(evt) => onTaskMove(evt, col.id)"
-            :disabled="false"
-            class="h-full w-full"
-          >
-            <div 
-              v-for="task in (col.id === 'ARCHIVE' ? store.archivedTasks : store.tasksByStatus(col.id))" 
-              :key="task.id" 
-              :data-id="task.id"
-              class="group hover:shadow-md transition-all cursor-pointer" 
-              @click="router.push(`/task/${task.id}`)"
-            >
-              <Card>
-                <CardHeader class="p-3 pb-1">
-                  <div class="flex justify-between items-start mb-2">
-                    <Badge :class="priorityColors[task.priority]" class="text-[10px] uppercase font-bold">
-                      {{ t('priorities.' + task.priority) }}
-                    </Badge>
-                    <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                       <Button variant="ghost" size="icon" class="w-6 h-6" @click.stop="col.id === 'ARCHIVE' ? store.unarchiveTask(task.id) : store.archiveTask(task.id)">
-                         <span class="text-xs">📦</span>
-                       </Button>
-                       <Button variant="ghost" size="icon" class="w-6 h-6" @click.stop="store.deleteTask(task.id)">
-                         <span class="text-xs">🗑️</span>
-                       </Button>
-                    </div>
-                  </div>
-                  <CardTitle class="text-base font-semibold leading-tight">
-                    {{ task.title }}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent class="p-3 pt-0">
-                  <p class="text-sm text-muted-foreground line-clamp-2 max-h-0 opacity-0 overflow-hidden transition-all duration-300 group-hover:max-h-20 group-hover:opacity-100 mb-0 group-hover:mb-4 translate-y-1 group-hover:translate-y-0">
-                    {{ task.description || $t('task.description_none') }}
-                  </p>
-                  <div class="flex justify-between items-center">
-                    <span class="text-[10px] text-muted-foreground">ID: {{ task.id.slice(-4) }}</span>
-                    <div class="flex gap-1">
-                      <Button 
-                        v-if="task.status !== 'TODO' && col.id !== 'ARCHIVE'" 
-                        variant="ghost" 
-                        size="sm" 
-                        class="h-7 px-2 text-xs"
-                        @click.stop="store.updateTask({ id: task.id, status: 'TODO' })"
-                      >
-                        ←
-                      </Button>
-                      <Button 
-                        v-if="task.status !== 'DONE' && col.id !== 'ARCHIVE'" 
-                        variant="ghost" 
-                        size="sm" 
-                        class="h-7 px-2 text-xs"
-                        @click.stop="store.updateTask({ id: task.id, status: col.id === 'DONE' ? 'DONE' : 'IN_PROGRESS' })"
-                      >
-                        →
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+      <template v-for="col in visibleColumns" :key="col.id">
+        <div 
+          v-if="col.id !== 'ARCHIVE' || isArchiveVisibleInDom"
+          :data-col-id="col.id"
+          :ref="el => { if (col.id === 'ARCHIVE') archiveRef = el as HTMLElement || null }"
+          class="kanban-column flex flex-col gap-0 flex-1 min-w-full md:min-w-0 snap-center whitespace-normal h-full glass-utility rounded-2xl shadow-lg border border-white/10 dark:border-white/5"
+          :class="[{ 'max-w-full': col.id === 'ARCHIVE' && showArchive }, { 'archive-column-hidden': col.id === 'ARCHIVE' && !isArchiveVisibleInDom }, { 'no-left-gap': col.id === 'ARCHIVE' && !isArchiveVisibleInDom }]"
+        >
+          <div class="flex items-center justify-between px-4 py-3 flex-shrink-0 border-b border-white/10 dark:border-white/5">
+            <div class="flex items-center gap-2">
+              <h3 class="font-semibold text-lg">{{ col.label }}</h3>
+              <Badge variant="outline" class="rounded-full">
+                {{ col.id === 'ARCHIVE' ? store.archivedTasks.length : store.tasksByStatus(col.id).length }}
+              </Badge>
             </div>
-          </VueDraggable>
-          
-          <div v-if="(col.id === 'ARCHIVE' ? store.archivedTasks : store.tasksByStatus(col.id)).length === 0" class="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm italic opacity-50 pointer-events-none">
-            {{ t('board.no_tasks') }}
+          </div>
+
+          <div :class="['flex flex-col gap-2 p-4 rounded-b-2xl flex-1 relative', col.color, { 'overflow-y-auto': col.id !== 'ARCHIVE' || showArchive, 'overflow-hidden': col.id === 'ARCHIVE' && !showArchive }]"
+               style="min-height: 150px;">
+            <VueDraggable
+              :model-value="(col.id === 'ARCHIVE' ? store.archivedTasks : store.tasksByStatus(col.id))"
+              group="tasks"
+              ghost-class="draggable-ghost"
+              :animation="200"
+              :key="col.id + (col.id === 'ARCHIVE' ? store.archivedTasks.length : store.tasksByStatus(col.id).length)"
+              @start="onDragStart"
+              @end="onDragEnd"
+              @change="(evt) => onTaskMove(evt, col.id)"
+              :disabled="false"
+              class="h-full w-full"
+            >
+              <div 
+                v-for="task in (col.id === 'ARCHIVE' ? store.archivedTasks : store.tasksByStatus(col.id))" 
+                :key="task.id" 
+                :data-id="task.id"
+                class="group hover:shadow-md transition-all cursor-pointer" 
+                @click="router.push(`/task/${task.id}`)"
+              >
+                <Card>
+                  <CardHeader class="p-3 pb-1">
+                    <div class="flex justify-between items-start mb-2">
+                      <Badge :class="priorityColors[task.priority]" class="text-[10px] uppercase font-bold">
+                        {{ t('priorities.' + task.priority) }}
+                      </Badge>
+                      <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <Button variant="ghost" size="icon" class="w-6 h-6" @click.stop="col.id === 'ARCHIVE' ? store.unarchiveTask(task.id) : store.archiveTask(task.id)">
+                           <span class="text-xs">📦</span>
+                         </Button>
+                         <Button variant="ghost" size="icon" class="w-6 h-6" @click.stop="store.deleteTask(task.id)">
+                           <span class="text-xs">🗑️</span>
+                         </Button>
+                      </div>
+                    </div>
+                    <CardTitle class="text-base font-semibold leading-tight">
+                      {{ task.title }}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent class="p-3 pt-0">
+                    <p class="text-sm text-muted-foreground line-clamp-2 max-h-0 opacity-0 overflow-hidden transition-all duration-300 group-hover:max-h-20 group-hover:opacity-100 mb-0 group-hover:mb-4 translate-y-1 group-hover:translate-y-0">
+                      {{ task.description || $t('task.description_none') }}
+                    </p>
+                    <div class="flex justify-between items-center">
+                      <span class="text-[10px] text-muted-foreground">ID: {{ task.id.slice(-4) }}</span>
+                      <div class="flex gap-1">
+                        <Button 
+                          v-if="task.status !== 'TODO' && col.id !== 'ARCHIVE'" 
+                          variant="ghost" 
+                          size="sm" 
+                          class="h-7 px-2 text-xs"
+                          @click.stop="store.updateTask({ id: task.id, status: 'TODO' })"
+                        >
+                          ←
+                        </Button>
+                        <Button 
+                          v-if="task.status !== 'DONE' && col.id !== 'ARCHIVE'" 
+                          variant="ghost" 
+                          size="sm" 
+                          class="h-7 px-2 text-xs"
+                          @click.stop="store.updateTask({ id: task.id, status: col.id === 'DONE' ? 'DONE' : 'IN_PROGRESS' })"
+                        >
+                          →
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </VueDraggable>
+            <div v-if="(col.id === 'ARCHIVE' ? store.archivedTasks : store.tasksByStatus(col.id)).length === 0" class="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm italic opacity-50 pointer-events-none">
+              {{ t('board.no_tasks') }}
+            </div>
           </div>
         </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { useKanbanStore } from '@/stores/useKanbanStore';
 import { useRouter } from 'vue-router';
 import { VueDraggable } from 'vue-draggable-plus';
@@ -214,6 +214,7 @@ const isDialogOpen = ref(false);
 // Navigation state
 const activeColumn = ref('TODO');
 const showArchive = ref(false);
+const isArchiveVisibleInDom = ref(showArchive.value);
 
 const newTask = ref({
   title: '',
@@ -241,6 +242,10 @@ const columns = computed(() => [
   { id: 'ARCHIVE', label: t('board.archive'), color: 'bg-transparent' },
 ]);
 
+const visibleColumns = computed(() => {
+  return columns.value;
+});
+
 const priorityColors: Record<string, string> = {
   LOW: 'bg-slate-400 text-white',
   MEDIUM: 'bg-yellow-500 text-white',
@@ -257,6 +262,8 @@ const isColumnVisible = (colId: string) => {
 };
 
 const boardContainer = ref<HTMLElement | null>(null);
+
+const archiveRef = ref<HTMLElement | null>(null);
 
 // Intersection Observer to sync activeColumn with the visible column on mobile
 let observer: IntersectionObserver | null = null;
@@ -281,6 +288,17 @@ onMounted(async () => {
 
   const columns = document.querySelectorAll('.kanban-column');
   columns.forEach((col) => observer?.observe(col));
+
+  // Set initial flex-basis based on archive state
+  if (!showArchive.value) {
+    const cols = boardContainer.value?.querySelectorAll('.kanban-column');
+    if (cols) {
+      cols.forEach(col => {
+        const isArchive = col.getAttribute('data-col-id') === 'ARCHIVE';
+        (col as HTMLElement).style.flexBasis = isArchive ? '0%' : '33.3%';
+      });
+    }
+  }
 });
 
 onUnmounted(() => {
@@ -352,7 +370,7 @@ const onDragEnd = (evt: any) => {
 
 const scrollIntoArchive = () => {
   if (!boardContainer.value) return;
-  const archiveCol = boardContainer.value.querySelector('[data-col-id=\"ARCHIVE\"]') as HTMLElement;
+  const archiveCol = boardContainer.value.querySelector('[data-col-id="ARCHIVE"]') as HTMLElement;
   if (archiveCol) {
     gsap.to(boardContainer.value, {
       scrollLeft: archiveCol.offsetLeft,
@@ -363,17 +381,79 @@ const scrollIntoArchive = () => {
   }
 };
 
-const onArchiveToggle = async (val: boolean) => {
-  showArchive.value = val;
+watch(showArchive, async (val) => {
+  console.log('showArchive changed to:', val);
+  if (!boardContainer.value) return;
+
   if (val) {
-    setTimeout(() => {
-      scrollIntoArchive();
-    }, 50);
+    isArchiveVisibleInDom.value = true;
+    await nextTick();
   }
-};
+
+  const cols = boardContainer.value.querySelectorAll('.kanban-column');
+  
+  // Animate flex-basis for all columns to coordinate the space redistribution
+  gsap.to(cols, {
+    flexBasis: (index, target) => {
+      const isArchive = target.getAttribute('data-col-id') === 'ARCHIVE';
+      if (isArchive) return val ? '25%' : '0%';
+      return val ? '25%' : '33.3%';
+    },
+    duration: 0.5,
+    ease: 'power2.out',
+    onComplete: () => {
+      if (!val) {
+        isArchiveVisibleInDom.value = false;
+      }
+    }
+  });
+
+  if (val) {
+    if (archiveRef.value) {
+      // Reset starting position for slide-in
+      gsap.set(archiveRef.value, { x: 50, opacity: 0, width: 0 });
+        
+      gsap.to(archiveRef.value, {
+        width: 'auto',
+        opacity: 1,
+        x: 0,
+        duration: 0.5,
+        ease: 'power2.out'
+      });
+      setTimeout(() => {
+        scrollIntoArchive();
+      }, 100);
+    }
+  } else {
+    if (archiveRef.value) {
+      gsap.to(archiveRef.value, {
+        width: 0,
+        opacity: 0,
+        x: 50,
+        duration: 0.4,
+        ease: 'power2.in'
+      });
+    }
+  }
+});
 </script>
 
 <style scoped>
+.archive-column-hidden {
+  flex: 0 0 0px;
+  width: 0;
+  opacity: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.no-left-gap {
+  margin-left: -3rem;
+}
+
 .draggable-ghost {
   opacity: 0.5 !important;
   background-color: #e2e8f0 !important;
