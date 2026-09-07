@@ -6,7 +6,8 @@
     "create_task": "Create Task",
     "archive": "Archive",
     "no_tasks": "No tasks here",
-    "show_archive": "Show Archive"
+    "show_archive": "Show Archive",
+    "hide_archive": "Hide Archive"
   },
   "task": {
     "create_title": "Create New Task",

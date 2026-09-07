@@ -9,9 +9,9 @@
       
       <div class="flex items-center gap-4 flex-shrink-0">
         <!-- Desktop Archive Toggle -->
-        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100/50 dark:bg-slate-800/50">
-          <span class="text-xs font-medium">{{ t('board.show_archive') }}</span>
-          <Switch v-model:checked="showArchive" />
+        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100/50 dark:bg-slate-800/50 relative z-[100] pointer-events-auto">
+          <span class="text-xs font-medium">{{ showArchive ? t('board.hide_archive') : t('board.show_archive') }}</span>
+          <Switch v-model="showArchive" />
         </div>
 
         <Dialog v-model:open="isDialogOpen">

@@ -6,7 +6,8 @@
     "create_task": "Crear Tarea",
     "archive": "Archivar",
     "no_tasks": "No hay tareas aquí",
-    "show_archive": "Mostrar Archivo"
+    "show_archive": "Mostrar Archivo",
+    "hide_archive": "Ocultar Archivo"
   },
   "task": {
     "create_title": "Crear Nueva Tarea",
