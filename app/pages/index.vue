@@ -2,8 +2,11 @@
   <div class="space-y-6 h-full flex flex-col relative">
     <BgGsapTest />
     <!-- Board Header Panel -->
-    <div class="flex flex-row justify-between items-center gap-4 flex-shrink-0 p-4 rounded-2xl shadow-lg border border-white/20 dark:border-white/10"
-         style="backdrop-filter: blur(4px); background-color: rgba(255, 255, 255, 0);">
+    <div 
+      ref="headerRef"
+      class="flex flex-row justify-between items-center gap-4 flex-shrink-0 p-4 rounded-2xl shadow-lg transition-all duration-500"
+      style="backdrop-filter: blur(4px); border: 1px solid rgba(255, 255, 255, 0.1); border-top: 1px solid rgba(255, 255, 255, 0.4); box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.3);"
+    >
       <div>
         <h2 class="text-3xl font-bold tracking-tight">{{ t('board.title') }}</h2>
         <p class="text-muted-foreground">{{ t('board.subtitle') }}</p>
@@ -218,6 +221,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 const store = useKanbanStore();
 const router = useRouter();
+const headerRef = ref<HTMLElement | null>(null);
 const isDialogOpen = ref(false);
 const dialogContentRef = ref<HTMLElement | null>(null);
 
@@ -368,6 +372,23 @@ onMounted(async () => {
   await store.loadTasks();
 
   if (typeof window === 'undefined') return;
+
+  // --- Dynamic Glass Lens Effect ---
+  // This must be outside the mobile check to work on Desktop
+  if (headerRef.value) {
+    console.log('Header Ref bound:', headerRef.value);
+    window.addEventListener('mousemove', (e) => {
+      const rect = headerRef.value!.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      
+      gsap.to(headerRef.value, {
+        backgroundImage: `radial-gradient(circle at ${x}% ${y}%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 30%)`,
+        duration: 0.4,
+        ease: 'power2.out'
+      });
+    });
+  }
   
   const isMobile = window.innerWidth < 768;
   if (isMobile) {
@@ -401,6 +422,22 @@ onMounted(async () => {
         (col as HTMLElement).style.flexBasis = isArchive ? '0%' : '33.3%';
       });
     }
+  }
+
+  // --- Dynamic Glass Lens Effect ---
+  if (headerRef.value) {
+    console.log('Header Ref bound:', headerRef.value);
+    window.addEventListener('mousemove', (e) => {
+      const rect = headerRef.value!.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      
+      gsap.to(headerRef.value, {
+        backgroundImage: `radial-gradient(circle at ${x}% ${y}%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 30%)`,
+        duration: 0.4,
+        ease: 'power2.out'
+      });
+    });
   }
 });
 
