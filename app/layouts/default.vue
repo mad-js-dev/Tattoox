@@ -15,8 +15,8 @@ const switchLanguage = () => {
 </script>
 
 <template>
-  <div class="h-screen flex flex-col text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-950 transition-colors duration-300 overflow-hidden">
-    <!-- <WebGLTestBackground /> -->
+  <div class="h-screen flex flex-col text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-950 transition-colors duration-300 overflow-hidden relative">
+    <slot name="background" />
     <header class="border-b bg-white/50 dark:bg-slate-900/50 backdrop-blur-md sticky top-0 z-50 flex-shrink-0">
       <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <div class="flex items-center gap-2">
@@ -41,7 +41,7 @@ const switchLanguage = () => {
       </div>
     </header>
 
-    <main class="flex-1 max-w-7xl mx-auto p-6 w-full overflow-hidden">
+    <main class="flex-1 max-w-7xl mx-auto p-6 w-full overflow-hidden relative z-10">
       <slot />
     </main>
   </div>

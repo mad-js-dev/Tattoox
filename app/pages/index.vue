@@ -1,7 +1,9 @@
 <template>
-  <div class="space-y-6 h-full flex flex-col">
+  <div class="space-y-6 h-full flex flex-col relative">
+    <BgGsapTest />
     <!-- Board Header Panel -->
-    <div class="flex flex-row justify-between items-center gap-4 flex-shrink-0 p-4 rounded-2xl glass-primary shadow-lg border border-white/10 dark:border-white/5">
+    <div class="flex flex-row justify-between items-center gap-4 flex-shrink-0 p-4 rounded-2xl shadow-lg border border-white/20 dark:border-white/10"
+         style="backdrop-filter: blur(4px); background-color: rgba(255, 255, 255, 0);">
       <div>
         <h2 class="text-3xl font-bold tracking-tight">{{ t('board.title') }}</h2>
         <p class="text-muted-foreground">{{ t('board.subtitle') }}</p>
@@ -98,8 +100,8 @@
           v-if="col.id !== 'ARCHIVE' || isArchiveVisibleInDom"
           :data-col-id="col.id"
           :ref="el => { if (col.id === 'ARCHIVE') archiveRef = el as HTMLElement || null }"
-          class="kanban-column flex flex-col gap-0 flex-1 min-w-full md:min-w-0 snap-center whitespace-normal h-full glass-utility rounded-2xl shadow-lg border border-white/10 dark:border-white/5 transition-all duration-500"
-          :style="{ marginLeft: col.id === 'TODO' ? '0' : '3rem' }"
+          class="kanban-column flex flex-col gap-0 flex-1 min-w-full md:min-w-0 snap-center whitespace-normal h-full rounded-2xl shadow-lg border border-white/20 dark:border-white/10 transition-all duration-500"
+          :style="{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(255, 255, 255, 0)', marginLeft: col.id === 'TODO' ? '0' : '3rem' }"
           :class="[{ 'max-w-full': col.id === 'ARCHIVE' && showArchive }, { 'archive-column-hidden': col.id === 'ARCHIVE' && !isArchiveVisibleInDom }, { 'no-left-gap': col.id === 'ARCHIVE' && !isArchiveVisibleInDom }]"
         >
           <div :class="['flex items-center justify-between px-4 py-3 flex-shrink-0 border-b border-white/10 dark:border-white/5 transition-opacity duration-500', { 'opacity-0': col.id === 'ARCHIVE' && !archiveContentVisible, 'opacity-100': col.id !== 'ARCHIVE' || archiveContentVisible }]">
@@ -198,6 +200,7 @@ import { useKanbanStore } from '@/stores/useKanbanStore';
 import { useRouter } from 'vue-router';
 import { VueDraggable } from 'vue-draggable-plus';
 import gsap from 'gsap';
+import { Plus } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -205,7 +208,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus } from 'lucide-vue-next';
+import BgGsapTest from '../../components/BgGsapTest.vue';
 import Tabs from '@/components/ui/tabs/Tabs.vue';
 import TabsList from '@/components/ui/tabs/TabsList.vue';
 import TabsTrigger from '@/components/ui/tabs/TabsTrigger.vue';
