@@ -167,7 +167,7 @@
                           variant="ghost" 
                           size="sm" 
                           class="h-7 px-2 text-xs"
-                          @click.stop="store.updateTask({ id: task.id, status: col.id === 'DONE' ? 'DONE' : 'IN_PROGRESS' })"
+                          @click.stop="store.updateTask({ id: task.id, status: 'DONE' })"
                         >
                           →
                         </Button>
