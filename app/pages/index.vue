@@ -86,17 +86,18 @@
 
     <div 
       ref="boardContainer"
-      class="flex flex-row gap-12 overflow-x-hidden snap-x snap-mandatory scroll-smooth w-full no-scrollbar flex-1 min-h-0"
+      class="flex flex-row gap-0 overflow-x-hidden snap-x snap-mandatory scroll-smooth w-full no-scrollbar flex-1 min-h-0"
     >
       <template v-for="col in visibleColumns" :key="col.id">
         <div 
           v-if="col.id !== 'ARCHIVE' || isArchiveVisibleInDom"
           :data-col-id="col.id"
           :ref="el => { if (col.id === 'ARCHIVE') archiveRef = el as HTMLElement || null }"
-          class="kanban-column flex flex-col gap-0 flex-1 min-w-full md:min-w-0 snap-center whitespace-normal h-full glass-utility rounded-2xl shadow-lg border border-white/10 dark:border-white/5"
+          class="kanban-column flex flex-col gap-0 flex-1 min-w-full md:min-w-0 snap-center whitespace-normal h-full glass-utility rounded-2xl shadow-lg border border-white/10 dark:border-white/5 transition-all duration-500"
+          :style="{ marginLeft: col.id === 'TODO' ? '0' : '3rem' }"
           :class="[{ 'max-w-full': col.id === 'ARCHIVE' && showArchive }, { 'archive-column-hidden': col.id === 'ARCHIVE' && !isArchiveVisibleInDom }, { 'no-left-gap': col.id === 'ARCHIVE' && !isArchiveVisibleInDom }]"
         >
-          <div class="flex items-center justify-between px-4 py-3 flex-shrink-0 border-b border-white/10 dark:border-white/5">
+          <div :class="['flex items-center justify-between px-4 py-3 flex-shrink-0 border-b border-white/10 dark:border-white/5 transition-opacity duration-500', { 'opacity-0': col.id === 'ARCHIVE' && !archiveContentVisible, 'opacity-100': col.id !== 'ARCHIVE' || archiveContentVisible }]">
             <div class="flex items-center gap-2">
               <h3 class="font-semibold text-lg">{{ col.label }}</h3>
               <Badge variant="outline" class="rounded-full">
@@ -105,7 +106,7 @@
             </div>
           </div>
 
-          <div :class="['flex flex-col gap-2 p-4 rounded-b-2xl flex-1 relative', col.color, { 'overflow-y-auto': col.id !== 'ARCHIVE' || showArchive, 'overflow-hidden': col.id === 'ARCHIVE' && !showArchive }]"
+          <div :class="['flex flex-col gap-2 p-4 rounded-b-2xl flex-1 relative transition-opacity duration-500', col.color, { 'overflow-y-auto': col.id !== 'ARCHIVE' || showArchive, 'overflow-hidden': col.id === 'ARCHIVE' && !showArchive, 'opacity-0': col.id === 'ARCHIVE' && !archiveContentVisible, 'opacity-100': col.id === 'ARCHIVE' && archiveContentVisible }]"
                style="min-height: 150px;">
             <VueDraggable
               :model-value="(col.id === 'ARCHIVE' ? store.archivedTasks : store.tasksByStatus(col.id))"
@@ -215,6 +216,7 @@ const isDialogOpen = ref(false);
 const activeColumn = ref('TODO');
 const showArchive = ref(false);
 const isArchiveVisibleInDom = ref(showArchive.value);
+const archiveContentVisible = ref(false);
 
 const newTask = ref({
   title: '',
@@ -399,7 +401,7 @@ watch(showArchive, async (val) => {
       if (isArchive) return val ? '25%' : '0%';
       return val ? '25%' : '33.3%';
     },
-    duration: 0.5,
+    duration: 0.4,
     ease: 'power2.out',
     onComplete: () => {
       if (!val) {
@@ -411,28 +413,58 @@ watch(showArchive, async (val) => {
   if (val) {
     if (archiveRef.value) {
       // Reset starting position for slide-in
-      gsap.set(archiveRef.value, { x: 50, opacity: 0, width: 0 });
+      gsap.set(archiveRef.value, { x: 40, opacity: 0, width: 0 });
+          
+      // Create a timeline to synchronize column expansion and column slide-in
+      const tl = gsap.timeline();
         
-      gsap.to(archiveRef.value, {
+      tl.to(cols, {
+        flexBasis: (index, target) => {
+          const isArchive = target.getAttribute('data-col-id') === 'ARCHIVE';
+          if (isArchive) return val ? '25%' : '0%';
+          return val ? '25%' : '33.3%';
+        },
+        duration: 0.4,
+        ease: 'power2.out'
+      }, 0); // Start at 0s
+
+      tl.to(archiveRef.value, {
         width: 'auto',
         opacity: 1,
         x: 0,
-        duration: 0.5,
-        ease: 'power2.out'
-      });
+        duration: 0.4,
+        ease: 'power2.out',
+        onComplete: () => {
+          archiveContentVisible.value = true;
+        }
+      }, 0); // Start at 0s
+
       setTimeout(() => {
         scrollIntoArchive();
       }, 100);
     }
   } else {
+    archiveContentVisible.value = false;
     if (archiveRef.value) {
-      gsap.to(archiveRef.value, {
+      const tl = gsap.timeline();
+        
+      tl.to(cols, {
+        flexBasis: (index, target) => {
+          const isArchive = target.getAttribute('data-col-id') === 'ARCHIVE';
+          if (isArchive) return val ? '25%' : '0%';
+          return val ? '25%' : '33.3%';
+        },
+        duration: 0.3,
+        ease: 'power2.in'
+      }, 0);
+
+      tl.to(archiveRef.value, {
         width: 0,
         opacity: 0,
-        x: 50,
-        duration: 0.4,
+        x: 40,
+        duration: 0.3,
         ease: 'power2.in'
-      });
+      }, 0);
     }
   }
 });
