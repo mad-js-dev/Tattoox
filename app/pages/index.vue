@@ -1,14 +1,13 @@
 <template>
   <div class="space-y-6 h-full flex flex-col relative">
+    <BgGsapTest />
     
-    <!-- Board Header Panel -->
-    <div 
-      ref="headerRef"
-      class="flex flex-row justify-between items-center gap-4 flex-shrink-0 p-0 rounded-2xl shadow-lg transition-all duration-500 relative overflow-hidden"
+    <GlassContainer 
+      rounded="rounded-2xl" 
+      className="flex flex-row justify-between items-center gap-4 flex-shrink-0 p-0 transition-all duration-500"
       style="border: 1px solid rgba(255, 255, 255, 0.1); border-top: 1px solid rgba(255, 255, 255, 0.4); box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.3);"
     >
-      <GlassLens :target="headerRef" />
-      <div class="relative z-10 flex flex-row justify-between items-center gap-4 w-full h-full p-4">
+      <div class="flex flex-row justify-between items-center gap-4 w-full h-full">
         <div>
           <h2 class="text-3xl font-bold tracking-tight">{{ t('board.title') }}</h2>
           <p class="text-muted-foreground">{{ t('board.subtitle') }}</p>
@@ -81,7 +80,7 @@
           </Dialog>
         </div>
       </div>
-    </div>
+    </GlassContainer>
 
     <!-- Mobile Navigation Tabs -->
     <div class="md:hidden flex-shrink-0">
@@ -101,9 +100,11 @@
       @touchend="handleTouchEnd"
     >
       <template v-for="col in visibleColumns" :key="col.id">
-        <div 
+        <GlassContainer 
           v-if="col.id !== 'ARCHIVE' || isArchiveVisibleInDom"
-          class="kanban-column flex flex-col gap-0 flex-1 min-w-full md:min-w-0 snap-center whitespace-normal h-full rounded-2xl shadow-lg border border-white/20 dark:border-white/10 transition-all duration-500"
+          rounded="rounded-2xl"
+          className="kanban-column flex flex-col gap-0 flex-1 min-w-full md:min-w-0 snap-center whitespace-normal h-full border border-white/20 dark:border-white/10 transition-all duration-500"
+          padding=""
           :style="{ marginLeft: col.id === 'TODO' ? '0' : '3rem' }"
         >
           <div :class="['flex items-center justify-between px-4 py-3 flex-shrink-0 border-b border-white/10 dark:border-white/5 transition-opacity duration-500', { 'opacity-0': col.id === 'ARCHIVE' && !archiveContentVisible, 'opacity-100': col.id !== 'ARCHIVE' || archiveContentVisible }]">
@@ -190,7 +191,7 @@
               {{ t('board.no_tasks') }}
             </div>
           </div>
-        </div>
+        </GlassContainer>
       </template>
     </div>
   </div>
@@ -211,7 +212,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import BgGsapTest from '../../components/BgGsapTest.vue';
-import GlassLens from '@/components/ui/GlassLens.vue';
+import GlassContainer from '@/components/ui/GlassContainer.vue';
 import Tabs from '@/components/ui/tabs/Tabs.vue';
 import TabsList from '@/components/ui/tabs/TabsList.vue';
 import TabsTrigger from '@/components/ui/tabs/TabsTrigger.vue';
@@ -221,7 +222,6 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 const store = useKanbanStore();
 const router = useRouter();
-const headerRef = ref<HTMLElement | null>(null);
 const isDialogOpen = ref(false);
 const dialogContentRef = ref<HTMLElement | null>(null);
 

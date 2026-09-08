@@ -18,25 +18,35 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   blur: 'blur(4px)',
-  radius: 120,
-  color: 'rgba(255, 255, 255, 0.2)',
+  radius: 130,
+  color: '', 
 });
 
 const lensRef = ref<HTMLElement | null>(null);
+const isDark = ref(false);
+
+// Local coordinates to fix the offset
+const localX = ref(0);
+const localY = ref(0);
+
+const resolveColor = () => {
+  if (props.color) return props.color;
+  return isDark.value ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.2)';
+};
 
 const overlayStyle = computed(() => ({
   backdropFilter: props.blur,
   WebkitBackdropFilter: props.blur as any,
-  backgroundColor: props.color,
-  maskImage: `radial-gradient(circle ${props.radius}px at var(--x, 50%) var(--y, 50%), transparent 0%, transparent 10%, black 30%)`,
-  WebkitMaskImage: `radial-gradient(circle ${props.radius}px at var(--x, 50%) var(--y, 50%), transparent 0%, transparent 10%, black 30%)`,
+  backgroundColor: resolveColor(),
+  // We use the local X and Y here to ensure the lens is aligned with the mouse
+  maskImage: `radial-gradient(circle ${props.radius}px at ${localX.value}px ${localY.value}px, transparent 0%, transparent 10%, black 30%)`,
+  WebkitMaskImage: `radial-gradient(circle ${props.radius}px at ${localX.value}px ${localY.value}px, transparent 0%, transparent 10%, black 30%)`,
   zIndex: -1,
 }));
 
-const handleMouseMove = (e: MouseEvent) => {
+const updateCoordinates = () => {
   if (!props.target) return;
   
-  // Handle cases where target is a Vue component or a plain element
   let targetEl: HTMLElement | null = null;
   if (props.target instanceof HTMLElement) {
     targetEl = props.target;
@@ -44,28 +54,41 @@ const handleMouseMove = (e: MouseEvent) => {
     targetEl = (props.target as any).$el || (props.target as any).element;
   }
   
-  if (!targetEl || !lensRef.value) return;
+  if (!targetEl) return;
   
   const rect = targetEl.getBoundingClientRect();
+  // Use the global coordinates provided by app.vue
+  const globalX = (window as any).globalMouseX || 0;
+  const globalY = (window as any).globalMouseY || 0;
   
-  // We must check if the mouse is actually inside the target element
-  if (
-    e.clientX >= rect.left &&
-    e.clientX <= rect.right &&
-    e.clientY >= rect.top &&
-    e.clientY <= rect.bottom
-  ) {
-    lensRef.value.style.setProperty('--x', `${e.clientX - rect.left}px`);
-    lensRef.value.style.setProperty('--y', `${e.clientY - rect.top}px`);
-  }
+  // Calculate position relative to this specific container
+  localX.value = globalX - rect.left;
+  localY.value = globalY - rect.top;
 };
 
+const updateTheme = () => {
+  isDark.value = document.documentElement.classList.contains('dark');
+};
+
+const themeObserver = new MutationObserver(() => updateTheme());
+
+let animationFrameId: number;
+
 onMounted(() => {
-  window.addEventListener('mousemove', handleMouseMove);
+  updateTheme();
+  themeObserver.observe(document.documentElement, { attributes: true });
+  
+  // Start a high-performance loop to keep the lens perfectly aligned
+  const tick = () => {
+    updateCoordinates();
+    animationFrameId = requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('mousemove', handleMouseMove);
+  themeObserver.disconnect();
+  cancelAnimationFrame(animationFrameId);
 });
 </script>
 
