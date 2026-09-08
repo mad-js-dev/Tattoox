@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref, nextTick } from 'vue';
 import gsap from 'gsap';
 
 const container = ref<HTMLElement | null>(null);
@@ -36,16 +36,16 @@ const getTCoords = (rows: number, cols: number) => {
   return coords;
 };
 
-const setupGrid = () => {
+const setupGrid = async () => {
   if (!container.value) return;
-
+  await nextTick();
+  const width = container.value.clientWidth;
+  const height = container.value.clientHeight;
   container.value.innerHTML = '';
   dots.value = [];
-  
-  const cols = Math.ceil(container.value.clientWidth / SPACING) + 1;
-  const rows = Math.ceil(container.value.clientHeight / SPACING) + 1;
+  const cols = Math.ceil(width / SPACING) + 1;
+  const rows = Math.ceil(height / SPACING) + 1;
   const tCoords = getTCoords(rows, cols);
-
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const dot = document.createElement('div');
@@ -65,68 +65,31 @@ const setupGrid = () => {
       dots.value.push(dot);
     }
   }
-
-  // 1. Background Dots: Fade in immediately
   const nonTDots = dots.value.filter((dot, i) => {
     const r = Math.floor(i / cols);
     const c = i % cols;
     return !tCoords.some(coord => coord.r === r && coord.c === c);
   });
-
   nonTDots.forEach((dot, i) => {
     const r = Math.floor(i / cols);
     const c = i % cols;
-    gsap.to(dot, {
-      opacity: 0.1,
-      duration: 2,
-      delay: (r + c) * 0.01,
-      ease: 'power1.out'
-    });
+    gsap.to(dot, { opacity: 0.1, duration: 2, delay: (r + c) * 0.01, ease: 'power1.out' });
   });
-
-  // 2. T-Dots: Start 1 second AFTER the background grid starts
   const tDots = dots.value.filter((dot, i) => {
     const r = Math.floor(i / cols);
     const c = i % cols;
     return tCoords.some(coord => coord.r === r && coord.c === c);
   });
-
-  // The "Flash" sequence delayed by 1 second
-  gsap.to(tDots, {
-    opacity: 1,
-    duration: 1,
-    delay: 1, // Delay the T flash by 1 second
-    stagger: {
-      amount: 0.5,
-      from: 'random'
-    },
-    ease: 'power2.out'
-  });
-
+  gsap.to(tDots, { opacity: 1, duration: 1, delay: 1, stagger: { amount: 0.5, from: 'random' }, ease: 'power2.out' });
   tDots.forEach((dot, i) => {
-    const tl = gsap.timeline({
-      delay: 2.5, // 1s initial delay + 1s fade in + 0.5s hold
-      repeat: -1,
-      yoyo: true,
-      repeatDelay: 1,
-    });
-
-    tl.to(dot, {
-      opacity: 0.1,
-      duration: 1,
-      ease: 'power2.in'
-    })
-    .to(dot, {
-      opacity: 1,
-      duration: 1.5,
-      delay: Math.random() * 2,
-      ease: 'power1.inOut'
-    });
+    const tl = gsap.timeline({ delay: 2.5, repeat: -1, yoyo: true, repeatDelay: 1 });
+    tl.to(dot, { opacity: 0.1, duration: 1, ease: 'power2.in' })
+      .to(dot, { opacity: 1, duration: 1.5, delay: Math.random() * 2, ease: 'power1.inOut' });
   });
 };
 
 onMounted(() => {
-  setupGrid();
+  setTimeout(setupGrid, 100);
   window.addEventListener('resize', setupGrid);
 });
 
@@ -138,7 +101,7 @@ onUnmounted(() => {
 <template>
   <div 
     ref="container" 
-    class="bg-gsap-test-container"
+    class="bg-gsap-test-container bg-slate-100 dark:bg-slate-950"
   >
   </div>
 </template>
@@ -152,7 +115,6 @@ onUnmounted(() => {
   height: 100vh;
   overflow: hidden;
   z-index: -1;
-  background: transparent;
   pointer-events: none;
 }
 .dot {
