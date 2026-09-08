@@ -16,7 +16,6 @@ const switchLanguage = () => {
 
 <template>
   <div class="h-screen flex flex-col text-slate-900 dark:text-slate-100 transition-colors duration-300 overflow-hidden relative">
-    <BgGsapTest />
     
     <header class="border-b bg-white/60 dark:bg-slate-900/50 backdrop-blur-md sticky top-0 z-50 flex-shrink-0">
       <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">

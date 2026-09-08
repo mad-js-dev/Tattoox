@@ -39,13 +39,17 @@ const getTCoords = (rows: number, cols: number) => {
 const setupGrid = async () => {
   if (!container.value) return;
   await nextTick();
+  
   const width = container.value.clientWidth;
   const height = container.value.clientHeight;
+  
   container.value.innerHTML = '';
   dots.value = [];
+  
   const cols = Math.ceil(width / SPACING) + 1;
   const rows = Math.ceil(height / SPACING) + 1;
   const tCoords = getTCoords(rows, cols);
+
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const dot = document.createElement('div');
@@ -65,22 +69,27 @@ const setupGrid = async () => {
       dots.value.push(dot);
     }
   }
+
   const nonTDots = dots.value.filter((dot, i) => {
     const r = Math.floor(i / cols);
     const c = i % cols;
     return !tCoords.some(coord => coord.r === r && coord.c === c);
   });
+
   nonTDots.forEach((dot, i) => {
     const r = Math.floor(i / cols);
     const c = i % cols;
     gsap.to(dot, { opacity: 0.1, duration: 2, delay: (r + c) * 0.01, ease: 'power1.out' });
   });
+
   const tDots = dots.value.filter((dot, i) => {
     const r = Math.floor(i / cols);
     const c = i % cols;
     return tCoords.some(coord => coord.r === r && coord.c === c);
   });
+
   gsap.to(tDots, { opacity: 1, duration: 1, delay: 1, stagger: { amount: 0.5, from: 'random' }, ease: 'power2.out' });
+
   tDots.forEach((dot, i) => {
     const tl = gsap.timeline({ delay: 2.5, repeat: -1, yoyo: true, repeatDelay: 1 });
     tl.to(dot, { opacity: 0.1, duration: 1, ease: 'power2.in' })
