@@ -1,110 +1,117 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import gsap from 'gsap';
 
 const container = ref<HTMLElement | null>(null);
 const dots = ref<HTMLElement[]>([]);
 
-const GRID_SIZE = 21; // 21x21 grid
 const DOT_SIZE = 8;
 const SPACING = 20;
-const TOP_BAR_HEIGHT = 5;
-const STEM_WIDTH = 4;
 
-const getTCoords = () => {
+const getTCoords = (rows: number, cols: number) => {
   const coords: { r: number, c: number }[] = [];
-  const mid = Math.floor(GRID_SIZE / 2);
-  const stemOffset = Math.floor(STEM_WIDTH / 2);
+  
+  // Final balanced T dimensions
+  const tHeight = 16; 
+  const tWidth = 16;
+  
+  // Center the T in the grid
+  const startCol = Math.floor((cols - tWidth) / 2);
+  const startRow = Math.floor((rows - tHeight) / 2);
+  
+  const topBarHeight = 3; // Adjusted to 3 dots tall
+  const stemWidth = 3;
+  const stemOffset = Math.floor(stemWidth / 2);
+  const midCol = startCol + Math.floor(tWidth / 2);
 
   // Top bar of the T
-  for (let r = 0; r < TOP_BAR_HEIGHT; r++) {
-    for (let c = 0; c < GRID_SIZE; c++) {
-      coords.push({ r, c });
+  for (let r = 0; r < topBarHeight; r++) {
+    for (let c = 0; c < tWidth; c++) {
+      coords.push({ r: startRow + r, c: startCol + c });
     }
   }
   // Stem of the T
-  for (let r = TOP_BAR_HEIGHT; r < GRID_SIZE; r++) {
+  for (let r = topBarHeight; r < tHeight; r++) {
     for (let t = -stemOffset; t <= stemOffset; t++) {
-      const c = mid + t;
-      if (c >= 0 && c < GRID_SIZE) {
-        coords.push({ r, c });
+      const c = midCol + t;
+      if (c >= 0 && c < cols) {
+        coords.push({ r: startRow + r, c });
       }
     }
   }
   return coords;
 };
 
-onMounted(() => {
+const setupGrid = () => {
   if (!container.value) return;
 
-  const setupGrid = () => {
-    // Clear existing dots
-    container.value!.innerHTML = '';
-    dots.value = [];
-    
-    const tCoords = getTCoords();
-    const gridWidth = (GRID_SIZE - 1) * SPACING;
-    const gridHeight = (GRID_SIZE - 1) * SPACING;
-    const offsetX = (window.innerWidth - gridWidth) / 2;
-    const offsetY = (window.innerHeight - gridHeight) / 2;
+  container.value.innerHTML = '';
+  dots.value = [];
+  
+  const cols = Math.ceil(window.innerWidth / SPACING) + 1;
+  const rows = Math.ceil(window.innerHeight / SPACING) + 1;
+  
+  const tCoords = getTCoords(rows, cols);
 
-    for (let r = 0; r < GRID_SIZE; r++) {
-      for (let c = 0; c < GRID_SIZE; c++) {
-        const dot = document.createElement('div');
-        dot.className = 'dot';
-        
-        Object.assign(dot.style, {
-          position: 'absolute',
-          width: `${DOT_SIZE}px`,
-          height: `${DOT_SIZE}px`,
-          borderRadius: '50%',
-          backgroundColor: '#cc0014',
-          zIndex: '1',
-          left: `${offsetX + c * SPACING}px`,
-          top: `${offsetY + r * SPACING}px`,
-        });
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      
+      Object.assign(dot.style, {
+        position: 'absolute',
+        width: `${DOT_SIZE}px`,
+        height: `${DOT_SIZE}px`,
+        borderRadius: '50%',
+        backgroundColor: '#cc0014',
+        zIndex: '1',
+        left: `${c * SPACING}px`,
+        top: `${r * SPACING}px`,
+      });
 
-        container.value!.appendChild(dot);
-        dots.value.push(dot);
+      container.value!.appendChild(dot);
+      dots.value.push(dot);
 
-        const isPartOfT = tCoords.some(coord => coord.r === r && coord.c === c);
-        gsap.set(dot, { opacity: isPartOfT ? 1 : 0.2 });
-      }
+      const isPartOfT = tCoords.some(coord => coord.r === r && coord.c === c);
+      gsap.set(dot, { opacity: isPartOfT ? 1 : 0.2 });
     }
+  }
 
-    // 1. Initialize all dots to low opacity immediately
-    dots.value.forEach(dot => {
-      gsap.set(dot, { opacity: 0.1 });
+  dots.value.forEach(dot => {
+    gsap.set(dot, { opacity: 0.1 });
+  });
+
+  const tDots = dots.value.filter((dot, i) => {
+    const r = Math.floor(i / cols);
+    const c = i % cols;
+    return tCoords.some(coord => coord.r === r && coord.c === c);
+  });
+  
+  const shuffledTDots = [...tDots].sort(() => Math.random() - 0.5);
+
+  shuffledTDots.forEach((dot, i) => {
+    const tl = gsap.timeline({
+      repeat: -1,
+      yoyo: true,
+      repeatDelay: 1,
     });
 
-    // 2. Filter and shuffle only the dots that should become bright (the "T")
-    const tDots = dots.value.filter((dot, i) => {
-      const r = Math.floor(i / GRID_SIZE);
-      const c = i % GRID_SIZE;
-      return tCoords.some(coord => coord.r === r && coord.c === c);
+    tl.to(dot, {
+      opacity: 1,
+      duration: 1.5,
+      delay: i * 0.02,
+      ease: 'power1.inOut'
     });
-    
-    const shuffledTDots = [...tDots].sort(() => Math.random() - 0.5);
+  });
+};
 
-    // 3. Animate only the "T" dots appearing and disappearing in a loop
-    shuffledTDots.forEach((dot, i) => {
-      const tl = gsap.timeline({
-        repeat: -1,
-        yoyo: true, // Reverse the animation back to original state
-        repeatDelay: 1, // Wait 1 second before reversing
-      });
-
-      tl.to(dot, {
-        opacity: 1,
-        duration: 1.5,
-        delay: i * 0.02,
-        ease: 'power1.inOut'
-      });
-    });
-  };
-
+onMounted(() => {
   setupGrid();
   window.addEventListener('resize', setupGrid);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', setupGrid);
 });
 </script>
 
@@ -113,7 +120,6 @@ onMounted(() => {
     ref="container" 
     class="bg-gsap-test-container"
   >
-    <div style="position: absolute; top: 10px; left: 10px; color: red; z-index: 10000; font-weight: bold; font-size: 20px;">BG COMPONENT ACTIVE</div>
   </div>
 </template>
 
@@ -127,9 +133,6 @@ onMounted(() => {
   z-index: -1;
   background: transparent;
   pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .dot {

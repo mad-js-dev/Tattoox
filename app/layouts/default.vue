@@ -15,9 +15,9 @@ const switchLanguage = () => {
 </script>
 
 <template>
-  <div class="h-screen flex flex-col text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-950 transition-colors duration-300 overflow-hidden relative">
+  <div class="h-screen flex flex-col text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-950 transition-colors duration-300 overflow-hidden relative">
     <slot name="background" />
-    <header class="border-b bg-white/50 dark:bg-slate-900/50 backdrop-blur-md sticky top-0 z-50 flex-shrink-0">
+    <header class="border-b bg-white/60 dark:bg-slate-900/50 backdrop-blur-md sticky top-0 z-50 flex-shrink-0">
       <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 border-2 border-primary rounded-lg flex items-center justify-center text-primary font-bold">T</div>
