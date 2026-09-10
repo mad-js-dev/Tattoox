@@ -25,9 +25,8 @@ const props = withDefaults(defineProps<Props>(), {
 const lensRef = ref<HTMLElement | null>(null);
 const isDark = ref(false);
 
-// Local coordinates to fix the offset
-const localX = ref(0);
-const localY = ref(0);
+// Reference to hold the observer so it can be disconnected in onUnmounted
+let themeObserver: MutationObserver | null = null;
 
 const resolveColor = () => {
   if (props.color) return props.color;
@@ -38,11 +37,13 @@ const overlayStyle = computed(() => ({
   backdropFilter: props.blur,
   WebkitBackdropFilter: props.blur as any,
   backgroundColor: resolveColor(),
-  // We use the local X and Y here to ensure the lens is aligned with the mouse
   maskImage: `radial-gradient(circle ${props.radius}px at ${localX.value}px ${localY.value}px, transparent 0%, transparent 10%, black 30%)`,
   WebkitMaskImage: `radial-gradient(circle ${props.radius}px at ${localX.value}px ${localY.value}px, transparent 0%, transparent 10%, black 30%)`,
   zIndex: -1,
 }));
+
+const localX = ref(0);
+const localY = ref(0);
 
 const updateCoordinates = () => {
   if (!props.target) return;
@@ -57,28 +58,28 @@ const updateCoordinates = () => {
   if (!targetEl) return;
   
   const rect = targetEl.getBoundingClientRect();
-  // Use the global coordinates provided by app.vue
   const globalX = (window as any).globalMouseX || 0;
   const globalY = (window as any).globalMouseY || 0;
   
-  // Calculate position relative to this specific container
   localX.value = globalX - rect.left;
   localY.value = globalY - rect.top;
 };
 
 const updateTheme = () => {
-  isDark.value = document.documentElement.classList.contains('dark');
+  if (typeof document !== 'undefined') {
+    isDark.value = document.documentElement.classList.contains('dark');
+  }
 };
-
-const themeObserver = new MutationObserver(() => updateTheme());
 
 let animationFrameId: number;
 
 onMounted(() => {
   updateTheme();
+  
+  // instantiate MutationObserver ONLY on the client
+  themeObserver = new MutationObserver(() => updateTheme());
   themeObserver.observe(document.documentElement, { attributes: true });
   
-  // Start a high-performance loop to keep the lens perfectly aligned
   const tick = () => {
     updateCoordinates();
     animationFrameId = requestAnimationFrame(tick);
@@ -87,7 +88,9 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  themeObserver.disconnect();
+  if (themeObserver) {
+    themeObserver.disconnect();
+  }
   cancelAnimationFrame(animationFrameId);
 });
 </script>
