@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6 h-full flex flex-col relative">
+<div class="space-y-6 h-full flex flex-col relative">
     <BgGsapTest />
     
     <GlassContainer 
@@ -7,7 +7,7 @@
       className="flex flex-row justify-between items-center gap-4 flex-shrink-0 p-0 transition-all duration-500"
       style="border: 1px solid rgba(255, 255, 255, 0.1); border-top: 1px solid rgba(255, 255, 255, 0.4); box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.3);"
     >
-      <div class="flex flex-row justify-between items-center gap-4 w-full h-full">
+      <div class="flex flex-row justify-between items-center gap-4 w-full h-full p-4">
         <div>
           <h2 class="text-3xl font-bold tracking-tight">{{ t('board.title') }}</h2>
           <p class="text-muted-foreground">{{ t('board.subtitle') }}</p>
@@ -82,7 +82,6 @@
       </div>
     </GlassContainer>
 
-    <!-- Mobile Navigation Tabs -->
     <div class="md:hidden flex-shrink-0">
       <Tabs v-model="activeColumn" defaultValue="TODO">
         <TabsList class="w-full justify-start overflow-x-auto">
@@ -95,19 +94,24 @@
 
     <div 
       ref="boardContainer"
-      class="flex flex-row gap-0 overflow-x-hidden snap-x snap-mandatory scroll-smooth w-full no-scrollbar flex-1 min-h-0"
+      class="flex flex-row gap-12 overflow-x-hidden snap-x snap-mandatory scroll-smooth w-full no-scrollbar flex-1 min-h-0"
       @touchstart="handleTouchStart"
       @touchend="handleTouchEnd"
     >
       <template v-for="col in visibleColumns" :key="col.id">
         <GlassContainer 
-          v-if="col.id !== 'ARCHIVE' || isArchiveVisibleInDom"
+          :ref="setArchiveRef"
+          :data-col-id="col.id"
           rounded="rounded-2xl"
-          className="kanban-column flex flex-col gap-0 flex-1 min-w-full md:min-w-0 snap-center whitespace-normal h-full border border-white/20 dark:border-white/10 transition-all duration-500"
+          :className="`kanban-column flex flex-col gap-0 min-w-full md:min-w-0 snap-center whitespace-normal h-full border border-white/20 dark:border-white/10 transition-all duration-500 ${ col.id !== 'ARCHIVE' ? 'flex-none' : '' }`"
           padding=""
-          :style="{ marginLeft: col.id === 'TODO' ? '0' : '3rem' }"
+          :style="{ 
+            marginLeft: col.id === 'TODO' ? '0' : '3rem', 
+            width: col.id !== 'ARCHIVE' ? 'calc(33.3% - 3rem)' : 'auto',
+            flexBasis: col.id !== 'ARCHIVE' ? 'calc(33.3% - 3rem)' : 'auto'
+          }"
         >
-          <div :class="['flex items-center justify-between px-4 py-3 flex-shrink-0 border-b border-white/10 dark:border-white/5 transition-opacity duration-500', { 'opacity-0': col.id === 'ARCHIVE' && !archiveContentVisible, 'opacity-100': col.id !== 'ARCHIVE' || archiveContentVisible }]">
+          <div :class="['flex items-center justify-between px-4 py-3 flex-shrink-0 border-b border-white/10 dark:border-white/5 transition-opacity duration-500', { 'opacity-0': col.id === 'ARCHIVE' && !showArchive, 'opacity-100': col.id !== 'ARCHIVE' || showArchive }]">
             <div class="flex items-center gap-2">
               <h3 class="font-semibold text-lg">{{ col.label }}</h3>
               <Badge variant="outline" class="rounded-full">
@@ -116,7 +120,7 @@
             </div>
           </div>
 
-          <div :class="['flex flex-col gap-2 p-4 rounded-b-2xl flex-1 relative transition-opacity duration-500', col.color, { 'overflow-y-auto': col.id !== 'ARCHIVE' || showArchive, 'overflow-hidden': col.id === 'ARCHIVE' && !showArchive, 'opacity-0': col.id === 'ARCHIVE' && !archiveContentVisible, 'opacity-100': col.id === 'ARCHIVE' && archiveContentVisible }]"
+          <div :class="['flex flex-col gap-2 p-4 rounded-b-2xl flex-1 relative transition-opacity duration-500', col.color, { 'overflow-y-auto': col.id !== 'ARCHIVE' || showArchive, 'overflow-hidden': col.id === 'ARCHIVE' && !showArchive, 'opacity-0': col.id === 'ARCHIVE' && !showArchive, 'opacity-100': col.id !== 'ARCHIVE' || showArchive }]"
                style="min-height: 150px;">
             <VueDraggable
               :model-value="(col.id === 'ARCHIVE' ? store.archivedTasks : store.tasksByStatus(col.id))"
@@ -187,12 +191,16 @@
                 </Card>
               </div>
             </VueDraggable>
-            <div v-if="(col.id === 'ARCHIVE' ? store.archivedTasks : store.tasksByStatus(col.id)).length === 0" class="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm italic opacity-50 pointer-events-none">
+            <div v-if="(col.id === 'ARCHIVE' ? store.archivedTasks : store.tasksByStatus(col.id)).length, 0" class="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm italic opacity-50 pointer-events-none">
               {{ t('board.no_tasks') }}
             </div>
           </div>
         </GlassContainer>
       </template>
+      
+
+
+
     </div>
   </div>
 </template>
@@ -347,8 +355,14 @@ const handleTouchEnd = (e: TouchEvent) => {
   }
 };
 
-const archiveRef = ref<HTMLElement | null>(null);
-let observer: IntersectionObserver | null = null;
+const archiveColumnRef = ref<any>(null);
+
+const setArchiveRef = (el: any) => {
+  if (el && (el as any).id === 'ARCHIVE') {
+    archiveColumnRef.value = el;
+  }
+};
+
 
 onMounted(async () => {
   await store.loadTasks();
@@ -358,7 +372,8 @@ onMounted(async () => {
     isDragDisabled.value = true;
   }
   if (window.innerWidth >= 768) return;
-  observer = new IntersectionObserver((entries) => {
+  
+  const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting && !isProgrammaticScrolling.value) {
         const colId = entry.target.getAttribute('data-col-id');
@@ -370,12 +385,13 @@ onMounted(async () => {
   }, {
     threshold: 0.6,
   });
-  const columns = document.querySelectorAll('.kanban-column');
-  columns.forEach((col) => observer?.observe(col));
+  const cols = document.querySelectorAll('.kanban-column');
+  cols.forEach((col) => observer.observe(col));
+  
   if (!showArchive.value) {
-    const cols = boardContainer.value?.querySelectorAll('.kanban-column');
-    if (cols) {
-      cols.forEach(col => {
+    const colElements = boardContainer.value?.querySelectorAll('.kanban-column');
+    if (colElements) {
+      colElements.forEach(col => {
         const isArchive = col.getAttribute('data-col-id') === 'ARCHIVE';
         (col as HTMLElement).style.flexBasis = isArchive ? '0%' : '33.3%';
       });
@@ -383,8 +399,44 @@ onMounted(async () => {
   }
 });
 
-onUnmounted(() => {
-  observer?.disconnect();
+watch(showArchive, async (val) => {
+  if (!archiveColumnRef.value) return;
+  
+  const el = (archiveColumnRef.value as any).$el || archiveColumnRef.value;
+  if (!(el instanceof HTMLElement)) return;
+
+  if (val) {
+    // Ensure we start from a hidden state for a clean animation
+    gsap.set(el, { width: 0, flexBasis: '0%', opacity: 0, marginLeft: '0rem' });
+    
+    const tl = gsap.timeline();
+    tl.to(el, { 
+      width: 'auto', 
+      flexBasis: 'calc(33.3% - 3rem)', 
+      opacity: 1, 
+      marginLeft: '3rem', 
+      duration: 0.5, 
+      ease: 'power2.out' 
+    })
+    .to(el.querySelectorAll('.transition-opacity'), { 
+      opacity: 1, 
+      duration: 0.3 
+    }, '-=0.2');
+  } else {
+    const tl = gsap.timeline();
+    tl.to(el.querySelectorAll('.transition-opacity'), { 
+      opacity: 0, 
+      duration: 0.3 
+    })
+    .to(el, { 
+      width: 0, 
+      flexBasis: '0%', 
+      opacity: 0, 
+      marginLeft: '0rem', 
+      duration: 0.5, 
+      ease: 'power2.in' 
+    }, '-=0.1');
+  }
 });
 
 watch(activeColumn, (newCol) => {
@@ -466,3 +518,14 @@ const scrollIntoArchive = () => {
   const archiveCol = boardContainer.value.querySelector('[data-col-id="ARCHIVE"]') as HTMLElement;
 };
 </script>
+
+<style scoped>
+.archive-hidden {
+  width: 0px !important;
+  flex-basis: 0px !important;
+  opacity: 0 !important;
+  margin-left: 0px !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
+</style>
