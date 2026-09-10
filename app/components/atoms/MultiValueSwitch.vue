@@ -89,6 +89,25 @@ const selectOption = (value: string) => {
   }
 
   // 3. Default: Single item selection
+  // On desktop we should not switch to a single-item value. Instead,
+  // clicking any non-range option should toggle the visible range
+  // (e.g. between `all` and `all_except_archive`) so the desktop view
+  // always shows a range of columns.
+  const rangeKeys = props.rangeMap ? Object.keys(props.rangeMap) : [];
+  const hasAllExcept = rangeKeys.includes('all_except_archive');
+  const defaultRange = hasAllExcept ? 'all_except_archive' : (rangeKeys[0] || 'all');
+
+  if (value !== 'archive' && value !== 'all' && value !== 'all_except_archive') {
+    if (currentVal === 'all') {
+      emit('update:modelValue', hasAllExcept ? 'all_except_archive' : 'all');
+    } else if (currentVal === 'all_except_archive') {
+      emit('update:modelValue', 'all');
+    } else {
+      emit('update:modelValue', defaultRange);
+    }
+    return;
+  }
+
   emit('update:modelValue', value);
 };
 
