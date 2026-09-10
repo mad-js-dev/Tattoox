@@ -1,6 +1,5 @@
 <template>
 <div class="space-y-6 h-full flex flex-col relative">
-    <BgGsapTest />
     
     <GlassContainer 
       rounded="rounded-2xl" 
