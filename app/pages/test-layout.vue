@@ -14,7 +14,7 @@
         </template>
         
         <template #col1>
-          <GlassContainer>
+          <GlassContainer class="h-full">
             <div class="p-4 text-center h-full">
               Column 1
             </div>
@@ -22,7 +22,7 @@
         </template>
         
         <template #col2>
-          <GlassContainer>
+          <GlassContainer class="h-full">
             <div class="p-4 text-center h-full">
               Column 2
             </div>
@@ -30,7 +30,7 @@
         </template>
         
         <template #col3>
-          <GlassContainer>
+          <GlassContainer class="h-full">
             <div class="p-4 text-center h-full">
               Column 3
             </div>
@@ -38,7 +38,7 @@
         </template>
         
         <template #col4>
-          <GlassContainer>
+          <GlassContainer class="h-full">
             <div class="p-4 text-center h-full">
               Column 4
             </div>
