@@ -1,21 +1,25 @@
 <template>
   <div class="flex flex-col w-full h-full gap-3">
     <!-- Header: Fills all available width -->
-    <header class="w-full shrink-0 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-4 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-2xl shadow-sm">
-      <div class="w-full md:w-auto text-left">
-        <slot name="header" />
-      </div>
-      <div class="w-full md:w-auto">
-        <MultiValueSwitch 
-          v-if="props.switchOptions"
-          :options="props.switchOptions" 
-          :model-value="props.switchModel"
-          :range-map="props.switchRangeMap"
-          :scroll-progress="computedScrollProgress"
-          @update:model-value="$emit('update:switchModel', $event)"
-        />
-      </div>
-    </header>
+    <GlassContainer rounded="rounded-2xl">
+      <header class="w-full shrink-0 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-4">
+        <div class="w-full md:w-auto text-left">
+          <slot name="header" />
+        </div>
+        <div class="w-full md:w-auto">
+          <MultiValueSwitch 
+            v-if="props.switchOptions"
+            :options="props.switchOptions" 
+            :model-value="props.switchModel"
+            :range-map="props.switchRangeMap"
+            :scroll-progress="computedScrollProgress"
+            @update:model-value="$emit('update:switchModel', $event)"
+          />
+        </div>
+      </header>
+    </GlassContainer>
+
+
 
     <!-- Columns Container: Horizontal scroll on mobile, grid-like on desktop -->
     <div ref="columnsContainer" class="flex flex-row overflow-x-auto snap-x snap-mandatory gap-3 no-scrollbar w-full flex-1">
@@ -46,6 +50,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue';
 import MultiValueSwitch from '@/components/atoms/MultiValueSwitch.vue';
+import GlassContainer from '@/components/ui/GlassContainer.vue';
 import gsap from 'gsap';
 
 interface Props {

@@ -14,27 +14,35 @@
         </template>
         
         <template #col1>
-          <div class="p-4 bg-red-500/20 border-2 border-red-500 rounded-xl text-center h-full">
-            Column 1
-          </div>
+          <GlassContainer>
+            <div class="p-4 text-center h-full">
+              Column 1
+            </div>
+          </GlassContainer>
         </template>
         
         <template #col2>
-          <div class="p-4 bg-green-500/20 border-2 border-green-500 rounded-xl text-center h-full">
-            Column 2
-          </div>
+          <GlassContainer>
+            <div class="p-4 text-center h-full">
+              Column 2
+            </div>
+          </GlassContainer>
         </template>
         
         <template #col3>
-          <div class="p-4 bg-yellow-500/20 border-2 border-yellow-500 rounded-xl text-center h-full">
-            Column 3
-          </div>
+          <GlassContainer>
+            <div class="p-4 text-center h-full">
+              Column 3
+            </div>
+          </GlassContainer>
         </template>
         
         <template #col4>
-          <div class="p-4 bg-purple-500/20 border-2 border-purple-500 rounded-xl text-center h-full">
-            Column 4
-          </div>
+          <GlassContainer>
+            <div class="p-4 text-center h-full">
+              Column 4
+            </div>
+          </GlassContainer>
         </template>
       </ResponsiveLayout>
     </ClientOnly>
@@ -44,6 +52,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import ResponsiveLayout from '@/components/templates/ResponsiveLayout.vue';
+import GlassContainer from '@/components/ui/GlassContainer.vue';
 
 const archiveValue = ref('all_except_archive');
 const archiveOptions = [
