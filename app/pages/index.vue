@@ -4,7 +4,6 @@
     <GlassContainer 
       rounded="rounded-2xl" 
       className="flex flex-row justify-between items-center gap-4 flex-shrink-0 p-0 transition-all duration-500"
-      style="border: 1px solid rgba(255, 255, 255, 0.1); border-top: 1px solid rgba(255, 255, 255, 0.4); box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.3);"
     >
       <div class="flex flex-row justify-between items-center gap-4 w-full h-full p-4">
         <div>
@@ -13,7 +12,7 @@
         </div>
         
         <div class="flex items-center gap-4 flex-shrink-0">
-          <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100/50 dark:bg-slate-800/50 relative z-[100] pointer-events-auto">
+          <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg  relative z-[100] pointer-events-auto">
             <span class="text-xs font-medium">{{ showArchive ? t('board.hide_archive') : t('board.show_archive') }}</span>
             <Switch v-model="showArchive" />
           </div>
@@ -27,7 +26,7 @@
             </DialogTrigger>
             <DialogContent 
               ref="dialogContentRef"
-              class="w-[90vw] max-w-[425px] glass-primary bg-white/70 backdrop-blur-md border-white/80 dark:bg-transparent dark:border-white/10 shadow-2xl mx-auto rounded-2xl"
+              class="w-[90vw] max-w-[425px] glass-primary bg-white/70  border-white/80 dark:bg-transparent dark:border-white/10 -2xl mx-auto rounded-2xl"
             >
               <DialogHeader>
                 <DialogTitle>{{ t('task.create_title') }}</DialogTitle>
@@ -75,7 +74,8 @@
                 <Button variant="outline" @click="isDialogOpen = false">{{ t('task.cancel') }}</Button>
                 <Button @click="handleAddTask">{{ t('board.create_task') }}</Button>
               </DialogFooter>
-            </DialogContent>
+                            </GlassPanel>
+                            </DialogContent>
           </Dialog>
         </div>
       </div>
@@ -121,24 +121,13 @@
 
           <div :class="['flex flex-col gap-2 p-4 rounded-b-2xl flex-1 relative transition-opacity duration-500', col.color, { 'overflow-y-auto': col.id !== 'ARCHIVE' || showArchive, 'overflow-hidden': col.id === 'ARCHIVE' && !showArchive, 'opacity-0': col.id === 'ARCHIVE' && !showArchive, 'opacity-100': col.id !== 'ARCHIVE' || showArchive }]"
                style="min-height: 150px;">
-            <VueDraggable
-              :model-value="(col.id === 'ARCHIVE' ? store.archivedTasks : store.tasksByStatus(col.id))"
-              group="tasks"
-              ghost-class="draggable-ghost"
-              :animation="200"
-              :key="col.id + (col.id === 'ARCHIVE' ? store.archivedTasks.length : store.tasksByStatus(col.id).length)"
-              @start="onDragStart"
-              @end="onDragEnd"
-              @change="(evt) => onTaskMove(evt, col.id)"
-              :disabled="isDragDisabled"
-              class="h-full w-full"
+            <div 
+              v-for="task in (col.id === 'ARCHIVE' ? store.archivedTasks : store.tasksByStatus(col.id))" 
+              :key="task.id" 
+              :data-id="task.id"
+              class="group hover:-md transition-all cursor-pointer" 
+              @click="router.push(`/task/${task.id}`)"
             >
-              <div 
-                v-for="task in (col.id === 'ARCHIVE' ? store.archivedTasks : store.tasksByStatus(col.id))" 
-                :key="task.id" 
-                :data-id="task.id"
-                class="group hover:shadow-md transition-all cursor-pointer" 
-                @click="router.push(`/task/${task.id}`)"
               >
                 <Card>
                   <CardHeader class="p-3 pb-1">
@@ -189,7 +178,6 @@
                   </CardContent>
                 </Card>
               </div>
-            </VueDraggable>
             <div v-if="(col.id === 'ARCHIVE' ? store.archivedTasks : store.tasksByStatus(col.id)).length, 0" class="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm italic opacity-50 pointer-events-none">
               {{ t('board.no_tasks') }}
             </div>
@@ -208,7 +196,6 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { useKanbanStore } from '@/stores/useKanbanStore';
 import { useRouter } from 'vue-router';
-import { VueDraggable } from 'vue-draggable-plus';
 import gsap from 'gsap';
 import { Plus } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
@@ -220,6 +207,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import BgGsapTest from '../../components/BgGsapTest.vue';
 import GlassContainer from '@/components/ui/GlassContainer.vue';
+import GlassPanel from '@/components/atoms/GlassPanel.vue';
 import Tabs from '@/components/ui/tabs/Tabs.vue';
 import TabsList from '@/components/ui/tabs/TabsList.vue';
 import TabsTrigger from '@/components/ui/tabs/TabsTrigger.vue';
@@ -492,25 +480,8 @@ const onTaskMove = async (evt: any, newStatus: string) => {
   }
 };
 
-const onDragStart = (evt: any) => {
-  gsap.to(evt.item, {
-    scale: 1.05,
-    boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-    duration: 0.3,
-    ease: 'power2.out',
-    zIndex: 1000
-  });
-};
-
-const onDragEnd = (evt: any) => {
-  gsap.to(evt.item, {
-    scale: 1,
-    boxShadow: 'none',
-    duration: 0.3,
-    ease: 'power2.in',
-    zIndex: 1
-  });
-};
+const onDragStart = () => {};
+const onDragEnd = () => {};
 
 const scrollIntoArchive = () => {
   if (!boardContainer.value) return;

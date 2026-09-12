@@ -1,8 +1,8 @@
 <template>
   <div class="flex flex-col w-full h-full gap-3">
     <!-- Header: Fills all available width -->
-    <GlassContainer rounded="rounded-2xl">
-      <header class="w-full shrink-0 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-4">
+    <GlassPanel class="w-full shrink-0 rounded-2xl">
+      <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-4">
         <div class="w-full md:w-auto text-left">
           <slot name="header" />
         </div>
@@ -17,9 +17,7 @@
           />
         </div>
       </header>
-    </GlassContainer>
-
-
+    </GlassPanel>
 
     <!-- Columns Container: Horizontal scroll on mobile, grid-like on desktop -->
     <div ref="columnsContainer" class="flex flex-row overflow-x-auto snap-x snap-mandatory gap-3 no-scrollbar w-full flex-1">
@@ -50,7 +48,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue';
 import MultiValueSwitch from '@/components/atoms/MultiValueSwitch.vue';
-import GlassContainer from '@/components/ui/GlassContainer.vue';
+import GlassPanel from '@/components/atoms/GlassPanel.vue';
 import gsap from 'gsap';
 
 interface Props {
@@ -127,9 +125,6 @@ const handleAnimation = async () => {
     }
 
     if (targetIdx !== -1 && columnRefs.value[targetIdx]) {
-        // If we're programmatically scrolling, temporarily disable the
-        // intersection observer so it doesn't override the user's selection
-        // when the scroll finishes and entries fire.
         if (activeObserver) {
           activeObserver.disconnect();
           activeObserver = null;
@@ -141,8 +136,6 @@ const handleAnimation = async () => {
           inline: 'start'
         });
 
-        // Re-enable the observer after a short delay to allow the smooth
-        // scroll to finish and avoid false positives.
         setTimeout(() => {
           if (window.innerWidth < 768) {
             activeObserver = setupIntersectionObserver();
@@ -193,7 +186,6 @@ watch(() => props.switchModel, handleAnimation);
 
 onMounted(() => {
   handleAnimation();
-  console.log('foo');
   if (window.innerWidth < 768) {
     activeObserver = setupIntersectionObserver();
     if (columnsContainer.value) {

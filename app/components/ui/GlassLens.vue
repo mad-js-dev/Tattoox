@@ -25,7 +25,6 @@ const props = withDefaults(defineProps<Props>(), {
 const lensRef = ref<HTMLElement | null>(null);
 const isDark = ref(false);
 
-// Reference to hold the observer so it can be disconnected in onUnmounted
 let themeObserver: MutationObserver | null = null;
 
 const resolveColor = () => {
@@ -34,11 +33,9 @@ const resolveColor = () => {
 };
 
 const overlayStyle = computed(() => ({
-  backdropFilter: props.blur,
-  WebkitBackdropFilter: props.blur as any,
   backgroundColor: resolveColor(),
-  maskImage: `radial-gradient(circle ${props.radius}px at ${localX.value}px ${localY.value}px, transparent 0%, transparent 10%, black 30%)`,
-  WebkitMaskImage: `radial-gradient(circle ${props.radius}px at ${localX.value}px ${localY.value}px, transparent 0%, transparent 10%, black 30%)`,
+  maskImage: `radial-gradient(circle ${props.radius}px at ${localX.value}px ${localY.value}px, black 0%, transparent 100%)`,
+  WebkitMaskImage: `radial-gradient(circle ${props.radius}px at ${localX.value}px ${localY.value}px, black 0%, transparent 100%)`,
   zIndex: -1,
 }));
 
@@ -76,7 +73,6 @@ let animationFrameId: number;
 onMounted(() => {
   updateTheme();
   
-  // instantiate MutationObserver ONLY on the client
   themeObserver = new MutationObserver(() => updateTheme());
   themeObserver.observe(document.documentElement, { attributes: true });
   

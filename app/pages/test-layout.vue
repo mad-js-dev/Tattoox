@@ -1,8 +1,8 @@
 <template>
-  <div class="h-full flex flex-col">    
+  <div class="h-screen w-full flex flex-col overflow-hidden">    
     <ClientOnly>
       <ResponsiveLayout 
-        class="flex-1"
+        class="flex-1 h-full"
         v-model:switchModel="archiveValue"
         :switch-options="archiveOptions"
         :switch-range-map="archiveRangeMap"
@@ -14,35 +14,35 @@
         </template>
         
         <template #col1>
-          <GlassContainer class="h-full">
-            <div class="p-4 text-center h-full">
-              Column 1
-            </div>
-          </GlassContainer>
+          <KanbanColumn 
+            :column="columns[0]!" 
+            :tasks="store.tasksByStatus(columns[0]!.id)" 
+            class="h-full" 
+          />
         </template>
         
         <template #col2>
-          <GlassContainer class="h-full">
-            <div class="p-4 text-center h-full">
-              Column 2
-            </div>
-          </GlassContainer>
+          <KanbanColumn 
+            :column="columns[1]!" 
+            :tasks="store.tasksByStatus(columns[1]!.id)" 
+            class="h-full" 
+          />
         </template>
         
         <template #col3>
-          <GlassContainer class="h-full">
-            <div class="p-4 text-center h-full">
-              Column 3
-            </div>
-          </GlassContainer>
+          <KanbanColumn 
+            :column="columns[2]!" 
+            :tasks="store.tasksByStatus(columns[2]!.id)" 
+            class="h-full" 
+          />
         </template>
         
         <template #col4>
-          <GlassContainer class="h-full">
-            <div class="p-4 text-center h-full">
-              Column 4
-            </div>
-          </GlassContainer>
+          <KanbanColumn 
+            :column="columns[3]!" 
+            :tasks="store.archivedTasks" 
+            class="h-full" 
+          />
         </template>
       </ResponsiveLayout>
     </ClientOnly>
@@ -50,9 +50,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import ResponsiveLayout from '@/components/templates/ResponsiveLayout.vue';
-import GlassContainer from '@/components/ui/GlassContainer.vue';
+import KanbanColumn from '@/components/organisms/KanbanColumn.vue';
+import { useKanbanStore } from '@/stores/useKanbanStore';
+
+const store = useKanbanStore();
+
+onMounted(async () => {
+  await store.loadTasks();
+});
 
 const archiveValue = ref('all_except_archive');
 const archiveOptions = [
@@ -66,4 +73,11 @@ const archiveRangeMap = {
   'all_except_archive': { start: 0, end: 2 },
   'all': { start: 0, end: 3 },
 };
+
+const columns = computed(() => [
+  { id: 'TODO', label: 'To Do', color: 'bg-transparent' },
+  { id: 'IN_PROGRESS', label: 'In Progress', color: 'bg-transparent' },
+  { id: 'DONE', label: 'Done', color: 'bg-transparent' },
+  { id: 'ARCHIVE', label: 'Archive', color: 'bg-transparent' },
+]);
 </script>
