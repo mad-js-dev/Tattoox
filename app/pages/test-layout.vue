@@ -1,7 +1,5 @@
 <template>
-  <div class="h-full flex flex-col">
-    <h1 class="text-2xl font-bold mb-6 shrink-0 p-4">Responsive Layout Test</h1>
-    
+  <div class="h-full flex flex-col">    
     <ClientOnly>
       <ResponsiveLayout 
         class="flex-1"
