@@ -1,6 +1,7 @@
 <template>
   <div 
-    class="group hover:shadow-md transition-all cursor-pointer"
+    :data-id="task.id" 
+    class="group hover:shadow-md transition-all cursor-grab active:cursor-grabbing select-none"
     @click="$emit('click', task.id)"
   >
     <Card>
