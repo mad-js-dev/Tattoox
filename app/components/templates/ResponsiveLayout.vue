@@ -6,15 +6,20 @@
         <div class="w-full md:w-auto text-left">
           <slot name="header" />
         </div>
-        <div class="w-full md:w-auto">
-          <MultiValueSwitch 
-            v-if="props.switchOptions"
-            :options="props.switchOptions" 
-            :model-value="props.switchModel"
-            :range-map="props.switchRangeMap"
-            :scroll-progress="computedScrollProgress"
-            @update:model-value="$emit('update:switchModel', $event)"
-          />
+        <div class="flex flex-col md:flex-row items-end md:items-center gap-3 w-full md:w-auto">
+          <div class="w-full md:w-auto flex justify-end">
+            <slot name="actions" />
+          </div>
+          <div class="w-full md:w-auto flex-shrink-0">
+            <MultiValueSwitch 
+              v-if="props.switchOptions"
+              :options="props.switchOptions" 
+              :model-value="props.switchModel"
+              :range-map="props.switchRangeMap"
+              :scroll-progress="computedScrollProgress"
+              @update:model-value="$emit('update:switchModel', $event)"
+            />
+          </div>
         </div>
       </header>
     </GlassPanel>
