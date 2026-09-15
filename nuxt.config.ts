@@ -4,6 +4,13 @@ export default defineNuxtConfig({
     baseURL: '/tattoox/',
     buildAssetsDir: '_nuxt',
   },
+  nitro: {
+    preset: 'github-pages',
+    prerender: {
+      crawlLinks: true,
+      routes: ['/']
+    }
+  },
   devtools: { enabled: true },
   srcDir: 'app/', 
   css: ['~/assets/css/tailwind.css'],
