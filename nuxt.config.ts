@@ -1,11 +1,10 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-09-04',
   app: {
-    baseURL: '/',
+    baseURL: '/tattoox/',
     buildAssetsDir: '_nuxt',
   },
   nitro: {
-    preset: 'github-pages',
     prerender: {
       crawlLinks: true,
       routes: ['/']
