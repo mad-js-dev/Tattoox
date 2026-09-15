@@ -1,8 +1,8 @@
 <template>
-  <GlassPanel :rounded="props.rounded" class="h-full flex flex-col">
+  <GlassPanel :rounded="props.rounded" class="flex-1 flex flex-col">
     <div 
       :class="[
-      'relative overflow-hidden -lg transition-all duration-500 h-full flex flex-col', 
+      'relative overflow-hidden -lg transition-all duration-500 flex-1 flex flex-col', 
       `rounded-${props.rounded}`, 
       columnClassName,
       ''

@@ -30,6 +30,13 @@ export default defineNuxtConfig({
     typeCheck: true
   },
   vite: {
+    server: {
+      allowedHosts: [
+        'maribel-extensa-2540.tailef5f9d.ts.net',
+        'maribel-extensa-2540',
+        'all',
+      ],
+    },
     resolve: {
       alias: {
         '@': '/home/maribel/Documentos/Tattoox/app',

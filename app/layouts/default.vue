@@ -39,7 +39,7 @@ const switchLanguage = () => {
       </div>
     </header>
 
-    <main class="flex-1 max-w-7xl mx-auto p-6 w-full overflow-hidden relative z-10">
+    <main class="flex-1 max-w-7xl mx-auto md:px-3 w-full overflow-hidden relative z-10">
       <slot />
     </main>
   </div>

@@ -18,7 +18,7 @@
     ></div>
     
     <!-- Content Layer: Stays sharp and above the blur -->
-    <div class="relative z-10">
+    <div class="relative z-10 h-full flex flex-col">
       <slot />
     </div>
   </div>

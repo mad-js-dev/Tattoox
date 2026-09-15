@@ -1,8 +1,8 @@
 <template>
-  <div class="flex flex-col w-full h-full gap-3">
+  <div class="h-screen w-full p-3 flex flex-col gap-3 overflow-hidden box-border">
     <!-- Header: Fills all available width -->
     <GlassPanel class="w-full shrink-0 rounded-2xl">
-      <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-4">
+      <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pt-2 pb-4 px-4">
         <div class="w-full md:w-auto text-left">
           <slot name="header" />
         </div>
@@ -25,7 +25,7 @@
     </GlassPanel>
 
     <!-- Columns Container: Horizontal scroll on mobile, grid-like on desktop -->
-    <div ref="columnsContainer" class="flex flex-row overflow-x-auto snap-x snap-mandatory gap-3 no-scrollbar w-full flex-1">
+    <div ref="columnsContainer" class="flex flex-row overflow-x-auto snap-x snap-mandatory gap-6 no-scrollbar w-full flex-1 min-h-0">
       <!-- Column 1 -->
       <div ref="colRef1" class="min-w-full snap-center md:min-w-0 md:flex-1 h-full">
         <slot name="col1" />
