@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useKanbanStore } from '@/stores/useKanbanStore';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { useKanbanStore } from '@/stores/useKanbanStore.ts';
+import { Button } from '@/components/ui/button/index';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card/index';
+import { Badge } from '@/components/ui/badge/index';
 import { useRouter } from 'vue-router';
 import { Archive, RotateCcw } from 'lucide-vue-next';
 

@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useKanbanStore } from '@/stores/useKanbanStore';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useKanbanStore } from '@/stores/useKanbanStore.ts';
+import { Button } from '@/components/ui/button/index';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card/index';
+import { Badge } from '@/components/ui/badge/index';
+import { Input } from '@/components/ui/input/index';
+import { Textarea } from '@/components/ui/textarea/index';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select/index';
 import { ArrowLeft, Save, Trash2 } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 

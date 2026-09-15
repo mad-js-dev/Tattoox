@@ -115,17 +115,17 @@
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import ResponsiveLayout from '@/components/templates/ResponsiveLayout.vue';
 import KanbanColumn from '@/components/organisms/KanbanColumn.vue';
-import { useKanbanStore } from '@/stores/useKanbanStore';
+import { useKanbanStore } from '@/stores/useKanbanStore.ts';
 import { useI18n } from 'vue-i18n';
 import gsap from 'gsap';
 import { Plus } from 'lucide-vue-next';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button/index';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card/index';
+import { Badge } from '@/components/ui/badge/index';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog/index';
+import { Input } from '@/components/ui/input/index';
+import { Textarea } from '@/components/ui/textarea/index';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select/index';
 
 const { t } = useI18n();
 const store = useKanbanStore();

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useDark, useToggle } from '@vueuse/core';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button/index';
+import { Badge } from '@/components/ui/badge/index';
 import BgGsapTest from "../../components/BgGsapTest.vue";
 
 const { locale, setLocale } = useI18n();

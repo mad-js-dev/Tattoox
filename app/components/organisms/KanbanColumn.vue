@@ -56,9 +56,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
-import { useKanbanStore } from '@/stores/useKanbanStore';
+import { useKanbanStore } from '@/stores/useKanbanStore.ts';
 import { useRouter } from 'vue-router';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge/index';
 import GlassPanel from '@/components/atoms/GlassPanel.vue';
 import TaskCard from '@/components/molecules/TaskCard.vue';
 import { useI18n } from 'vue-i18n';
