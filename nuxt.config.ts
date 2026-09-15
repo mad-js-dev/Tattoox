@@ -2,7 +2,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-09-04',
   app: {
     baseURL: process.env.GITHUB_PAGES === 'true' ? '/tattoox/' : '/',
-    buildAssetsDir: 'assets',
+    buildAssetsDir: '_nuxt',
   },
   devtools: { enabled: true },
   srcDir: 'app/', 
