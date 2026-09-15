@@ -27,7 +27,7 @@ export default defineNuxtConfig({
       { code: 'en', iso: 'en-US', name: 'English', file: 'en.json' },
       { code: 'es', iso: 'es-ES', name: 'Español', file: 'es.json' }
     ],
-    langDir: 'locales',
+    langDir: 'app/locales',
   },
   typescript: {
     strict: true,
