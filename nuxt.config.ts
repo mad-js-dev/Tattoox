@@ -1,7 +1,4 @@
-export default defineNuxtConfig({
-  compatibilityDate: '2026-09-04',
-  devtools: { enabled: true },
-  srcDir: 'app/', 
+export default defineNuxtConfig({\n  compatibilityDate: '2026-09-04',\n  app: {\n    baseURL: process.env.GITHUB_PAGES === 'true' ? '/tattoox/' : '/',\n    buildAssetsDir: 'assets',\n  },\n  devtools: { enabled: true },\n  srcDir: 'app/', 
   css: ['~/assets/css/tailwind.css'],
   modules: [
     '@nuxtjs/tailwindcss',
