@@ -2,24 +2,24 @@
   <div class="h-screen w-full p-3 flex flex-col gap-3 overflow-hidden box-border">
     <!-- Header: Fills all available width -->
     <GlassPanel class="w-full shrink-0 rounded-2xl">
-      <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pt-2 pb-4 px-4">
-        <div class="w-full md:w-auto text-left">
-          <slot name="header" />
-        </div>
-        <div class="flex flex-col md:flex-row items-end md:items-center gap-3 w-full md:w-auto">
-          <div class="w-full md:w-auto flex justify-end">
+      <header class="flex flex-col gap-4 pt-2 pb-4 px-4">
+        <div class="flex items-center justify-between w-full">
+          <div class="text-left">
+            <slot name="header" />
+          </div>
+          <div class="flex justify-end">
             <slot name="actions" />
           </div>
-          <div class="w-full md:w-auto flex-shrink-0">
-            <MultiValueSwitch 
-              v-if="props.switchOptions"
-              :options="props.switchOptions" 
-              :model-value="props.switchModel"
-              :range-map="props.switchRangeMap"
-              :scroll-progress="computedScrollProgress"
-              @update:model-value="$emit('update:switchModel', $event)"
-            />
-          </div>
+        </div>
+        <div class="w-full md:w-auto flex-shrink-0">
+          <MultiValueSwitch 
+            v-if="props.switchOptions"
+            :options="props.switchOptions" 
+            :model-value="props.switchModel"
+            :range-map="props.switchRangeMap"
+            :scroll-progress="computedScrollProgress"
+            @update:model-value="$emit('update:switchModel', $event)"
+          />
         </div>
       </header>
     </GlassPanel>
