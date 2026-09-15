@@ -11,7 +11,7 @@
             <slot name="actions" />
           </div>
         </div>
-        <div class="w-full md:w-auto flex-shrink-0">
+        <div class="w-full md:flex md:justify-end flex-shrink-0">
           <MultiValueSwitch 
             v-if="props.switchOptions"
             :options="props.switchOptions" 

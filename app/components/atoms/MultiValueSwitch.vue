@@ -1,7 +1,7 @@
 <template>
   <div 
     ref="trackRef" 
-    class="relative p-1 flex items-center rounded-full bg-slate-200/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/20 dark:border-white/10 w-full"
+    class="relative p-1 flex items-center rounded-full bg-slate-200/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/20 dark:border-white/10 w-fit"
   >
     <!-- The Animated Pill -->
     <div 
