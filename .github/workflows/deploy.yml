@@ -27,7 +27,13 @@ jobs:
         run: npm install --legacy-peer-deps
 
       - name: Generate Static Site
-        run: npm run generate
+        run: |
+          npm run generate
+          mkdir -p .output/public/tattoox
+          mv .output/public/_nuxt .output/public/tattoox/
+          mv .output/public/_payload.json .output/public/tattoox/ 2>/dev/null || true
+          # Move other root files into the subfolder
+          find .output/public -maxdepth 1 -type f -exec mv {} .output/public/tattoox/ \;
         env:
           GITHUB_PAGES: true
 
