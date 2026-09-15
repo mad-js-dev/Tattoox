@@ -52,8 +52,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue';
-import MultiValueSwitch from '@/components/atoms/MultiValueSwitch.vue';
-import GlassPanel from '@/components/atoms/GlassPanel.vue';
+import MultiValueSwitch from '../../components/atoms/MultiValueSwitch.vue';
+import GlassPanel from '../../components/atoms/GlassPanel.vue';
 import gsap from 'gsap';
 
 interface Props {

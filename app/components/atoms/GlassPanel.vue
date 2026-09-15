@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import GlassLens from '@/components/ui/GlassLens.vue';
+import GlassLens from '../../components/ui/GlassLens.vue';
 
 interface Props {
   variant?: 'light' | 'dark' | 'auto';

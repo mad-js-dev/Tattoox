@@ -1,7 +1,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-09-04',
   app: {
-    baseURL: '',
+    baseURL: '/tattoox/',
     buildAssetsDir: '_nuxt',
   },
   nitro: {
@@ -12,7 +12,7 @@ export default defineNuxtConfig({
   },
   devtools: { enabled: true },
   srcDir: 'app/', 
-  css: ['~/assets/css/tailwind.css'],
+  css: ['assets/css/tailwind.css'],
   modules: [
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',

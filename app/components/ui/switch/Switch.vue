@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { SwitchRoot } from 'radix-vue'
-import { cn } from '@/lib/utils.ts'
+import { cn } from '../../../lib/utils.ts'
 
 defineProps<{
   modelValue?: boolean

@@ -46,9 +46,9 @@
 </template>
 
 <script setup lang="ts">
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card/index.ts';
-import { Badge } from '@/components/ui/badge/index.ts';
-import { Button } from '@/components/ui/button/index.ts';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card/index.ts';
+import { Badge } from '../../components/ui/badge/index.ts';
+import { Button } from '../../components/ui/button/index.ts';
 
 interface Task {
   id: string;

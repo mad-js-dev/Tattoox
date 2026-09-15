@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { HTMLAttributes } from "vue"
-import { cn } from "@/lib/utils.ts"
-import GlassPanel from '@/components/atoms/GlassPanel.vue'
+import { cn } from "../../../lib/utils.ts"
+import GlassPanel from '../../../components/atoms/GlassPanel.vue'
 
 const props = defineProps<{
   class?: HTMLAttributes["class"]
