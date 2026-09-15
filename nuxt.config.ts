@@ -1,4 +1,11 @@
-export default defineNuxtConfig({\n  compatibilityDate: '2026-09-04',\n  app: {\n    baseURL: process.env.GITHUB_PAGES === 'true' ? '/tattoox/' : '/',\n    buildAssetsDir: 'assets',\n  },\n  devtools: { enabled: true },\n  srcDir: 'app/', 
+export default defineNuxtConfig({
+  compatibilityDate: '2026-09-04',
+  app: {
+    baseURL: process.env.GITHUB_PAGES === 'true' ? '/tattoox/' : '/',
+    buildAssetsDir: 'assets',
+  },
+  devtools: { enabled: true },
+  srcDir: 'app/', 
   css: ['~/assets/css/tailwind.css'],
   modules: [
     '@nuxtjs/tailwindcss',
@@ -20,7 +27,7 @@ export default defineNuxtConfig({\n  compatibilityDate: '2026-09-04',\n  app: {\
       { code: 'en', iso: 'en-US', name: 'English', file: 'en.json' },
       { code: 'es', iso: 'es-ES', name: 'Español', file: 'es.json' }
     ],
-    langDir: '/home/maribel/Documentos/Tattoox/app/locales',
+    langDir: 'locales',
   },
   typescript: {
     strict: true,
@@ -36,8 +43,8 @@ export default defineNuxtConfig({\n  compatibilityDate: '2026-09-04',\n  app: {\
     },
     resolve: {
       alias: {
-        '@': '/home/maribel/Documentos/Tattoox/app',
-        '~': '/home/maribel/Documentos/Tattoox/app',
+        '@': './app',
+        '~': './app',
       },
     },
   },
