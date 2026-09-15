@@ -109,7 +109,7 @@ let draggableInstance: any = null;
 onMounted(async () => {
   await nextTick();
   setTimeout(() => {
-    if (dragList.value) {
+    if (dragList.value && window.innerWidth >= 768) {
       try {
         draggableInstance = useDraggable(dragList.value, {
           group: 'kanban',
