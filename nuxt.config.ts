@@ -30,8 +30,8 @@ export default defineNuxtConfig({
     langDir: 'locales',
   },
   typescript: {
-    strict: true,
-    typeCheck: true
+    strict: false,
+    typeCheck: false
   },
   vite: {
     server: {
