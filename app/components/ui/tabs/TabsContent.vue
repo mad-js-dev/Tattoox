@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { TabsContent } from 'radix-vue'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils.ts'
 
 defineProps<{
   value: string
