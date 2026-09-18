@@ -37,7 +37,7 @@
         <p class="text-sm text-muted-foreground line-clamp-2 max-h-0 opacity-0 overflow-hidden transition-all duration-300 group-hover:max-h-20 group-hover:opacity-100 mb-0 group-hover:mb-4 translate-y-1 group-hover:translate-y-0">
           {{ task.description || t('task.description_none') }}
         </p>
-        <div class="flex justify-between items-center">
+        <div class="flex justify-end items-center">
           <span class="text-[10px] text-muted-foreground">ID: {{ task.id.slice(-4) }}</span>
         </div>
       </CardContent>
