@@ -29,8 +29,10 @@ jobs:
       - name: Generate Static Site
         run: |
           npm run generate
+          touch .output/public/.nojekyll
         env:
           GITHUB_PAGES: true
+          NUXT_APP_BASE_URL: /tattoox/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
