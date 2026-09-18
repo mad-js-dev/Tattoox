@@ -29,9 +29,6 @@ jobs:
       - name: Generate Static Site
         run: |
           npm run generate
-          mkdir -p .output/public/tattoox
-          # Move everything except the new tattoox folder itself
-          find .output/public -maxdepth 1 ! -name 'tattoox' ! -name '.' -exec mv {} .output/public/tattoox/ \;
         env:
           GITHUB_PAGES: true
 
