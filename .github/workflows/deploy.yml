@@ -31,7 +31,6 @@ jobs:
           npm run generate
           touch .output/public/.nojekyll
         env:
-          GITHUB_PAGES: true
           NUXT_APP_BASE_URL: /tattoox/
 
       - name: Upload artifact
