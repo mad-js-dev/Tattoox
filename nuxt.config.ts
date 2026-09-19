@@ -1,8 +1,8 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-09-04',
   app: {
-    baseURL: process.env.NUXT_APP_BASE_URL || '/tattoox/',
-    buildAssetsDir: '_nuxt',
+    baseURL: '/tattoox/',
+    buildAssetsDir: '/_nuxt/',
   },
   nitro: {
     prerender: {
