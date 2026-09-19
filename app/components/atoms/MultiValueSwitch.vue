@@ -18,7 +18,7 @@
         :ref="el => { if (el) optionRefs[index] = el as HTMLElement }"
         @click="selectOption(option.value)"
         :class="[
-          'flex-1 px-4 py-1.5 rounded-full text-[13px] md:text-sm transition-none outline-none border-none bg-transparent cursor-pointer text-center truncate',
+          'flex-1 px-4 py-1.5 rounded-full text-[13px] md:text-sm transition-none outline-none border-none bg-transparent cursor-pointer text-center truncate md:overflow-visible',
           modelValue === option.value ? 'font-medium text-slate-900 dark:text-white' : 'font-normal text-slate-500 dark:text-slate-400'
         ]"
         class="option-text"
