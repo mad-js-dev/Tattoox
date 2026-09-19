@@ -1,7 +1,7 @@
 <template>
   <div 
     ref="trackRef" 
-    class="relative p-1 flex items-center rounded-full bg-slate-200/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/20 dark:border-white/10 w-fit"
+    class="relative p-1 flex items-center rounded-full bg-slate-200/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/20 dark:border-white/10 w-full md:w-fit"
   >
     <!-- The Animated Pill -->
     <div 
@@ -18,12 +18,12 @@
         :ref="el => { if (el) optionRefs[index] = el as HTMLElement }"
         @click="selectOption(option.value)"
         :class="[
-          'flex-1 px-4 py-1.5 rounded-full text-sm transition-none outline-none border-none bg-transparent cursor-pointer text-center',
+          'flex-1 px-4 py-1.5 rounded-full text-[13px] md:text-sm transition-none outline-none border-none bg-transparent cursor-pointer text-center truncate',
           modelValue === option.value ? 'font-medium text-slate-900 dark:text-white' : 'font-normal text-slate-500 dark:text-slate-400'
         ]"
         class="option-text"
       >
-        {{ option.label }}
+        {{ t(option.label) }}
       </button>
     </div>
   </div>
@@ -31,6 +31,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, nextTick } from 'vue';
+import { useI18n } from 'vue-i18n';
 import gsap from 'gsap';
 
 interface Option {
@@ -49,6 +50,7 @@ interface Props {
 const props = defineProps<Props>();
 const emit = defineEmits(['update:modelValue']);
 
+const { t } = useI18n();
 const trackRef = ref<HTMLElement | null>(null);
 const pillRef = ref<HTMLElement | null>(null);
 const optionRefs = ref<HTMLElement[]>([]);

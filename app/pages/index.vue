@@ -9,7 +9,7 @@
       >
         <template #header>
           <div class="font-bold text-lg md:text-2xl tracking-tight">
-            Kanban Control
+            {{ $t('board.control_title') }}
           </div>
         </template>
 
@@ -18,7 +18,7 @@
             <DialogTrigger as-child>
               <Button class="gap-2 px-4 py-2">
                 <Plus class="w-4 h-4" />
-                {{ t('board.new_task') }}
+                {{ $t('board.new_task') }}
               </Button>
             </DialogTrigger>
             <DialogContent 
@@ -26,8 +26,8 @@
               class="w-[90vw] max-w-[425px] glass-primary bg-white/70 border-white/80 dark:bg-transparent dark:border-white/10 rounded-2xl mx-auto"
             >
               <DialogHeader>
-                <DialogTitle>{{ t('task.create_title') }}</DialogTitle>
-                <DialogDescription>{{ t('task.create_description') }}</DialogDescription>
+                <DialogTitle>{{ $t('task.create_title') }}</DialogTitle>
+                <DialogDescription>{{ $t('task.create_description') }}</DialogDescription>
               </DialogHeader>
               <div class="grid gap-4 py-4">
                 <div class="grid gap-2">
@@ -208,12 +208,12 @@ onMounted(async () => {
 });
 
 const archiveValue = ref('all_except_archive');
-const archiveOptions = [
-  { label: 'Backlog', value: 'backlog' },
-  { label: 'Active', value: 'active' },
-  { label: 'Done', value: 'done' },
-  { label: 'Archive', value: 'archive' },
-];
+const archiveOptions = computed(() => [
+  { label: 'board.filter.backlog', value: 'backlog' },
+  { label: 'board.filter.active', value: 'active' },
+  { label: 'board.filter.done', value: 'done' },
+  { label: 'board.filter.archive', value: 'archive' },
+]);
 
 const archiveRangeMap = {
   'all_except_archive': { start: 0, end: 2 },
@@ -221,9 +221,9 @@ const archiveRangeMap = {
 };
 
 const columns = computed(() => [
-  { id: 'TODO', label: 'To Do', color: 'bg-transparent' },
-  { id: 'IN_PROGRESS', label: 'In Progress', color: 'bg-transparent' },
-  { id: 'DONE', label: 'Done', color: 'bg-transparent' },
-  { id: 'ARCHIVE', label: 'Archive', color: 'bg-transparent' },
+  { id: 'TODO', label: t('statuses.TODO'), color: 'bg-transparent' },
+  { id: 'IN_PROGRESS', label: t('statuses.IN_PROGRESS'), color: 'bg-transparent' },
+  { id: 'DONE', label: t('statuses.DONE'), color: 'bg-transparent' },
+  { id: 'ARCHIVE', label: t('statuses.ARCHIVE'), color: 'bg-transparent' },
 ]);
 </script>

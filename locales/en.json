@@ -34,9 +34,9 @@
   "priorities.LOW": "Low",
   "priorities.MEDIUM": "Medium",
   "priorities.HIGH": "High",
-  "statuses.TODO": "Backlog",
-  "statuses.IN_PROGRESS": "Active",
-  "statuses.DONE": "Done",
+  "statuses.TODO": "To Do",
+  "statuses.IN_PROGRESS": "Progress",
+  "statuses.DONE": "Completed",
   "statuses.ARCHIVE": "Archive",
   "errors.not_found_title": "Task not found",
   "errors.not_found_desc": "The task you are looking for does not exist or has been deleted."
